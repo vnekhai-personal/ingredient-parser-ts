@@ -1,5 +1,5 @@
 {
-  "name": "ingredient-parser-ts-training",
+  "name": "ingredient-parser-typescript-training",
   "private": true,
   "description": "Node-side helpers for the training pipeline (natural's Brill tagger + Porter stemmer). Pinned exactly: the tagger/stemmer at training MUST match inference (CLAUDE.md I2).",
   "type": "module",

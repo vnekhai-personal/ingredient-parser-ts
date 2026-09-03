@@ -30,7 +30,7 @@ const SELF = fileURLToPath(import.meta.url);
 const OUT = resolve(ROOT, 'src/en/data/ffcache.en.ts');
 const GLOVE_GZ = resolve(ROOT, 'models/upstream/ingredient_embeddings.35d.glove.txt.gz');
 const FDC_GZ = resolve(ROOT, 'models/upstream/fdc_ingredients.csv.gz');
-const BUILD_DIR = resolve(ROOT, 'node_modules/.cache/ingredient-parser-ts/ffcache-build');
+const BUILD_DIR = resolve(ROOT, 'node_modules/.cache/ingredient-parser-typescript/ffcache-build');
 // Modules whose behaviour the cache freezes; their import closure (minus data/) is hashed.
 const ROOTS = [
   'src/en/foundationfoods/_ff_utils.ts',

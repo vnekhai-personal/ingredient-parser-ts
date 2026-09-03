@@ -1,5 +1,5 @@
 {
-  "name": "ingredient-parser-ts",
+  "name": "ingredient-parser-typescript",
   "version": "0.0.0",
   "private": true,
   "description": "Bit-parity TypeScript port of strangetom/ingredient-parser (pinned at ffd6ae3, release 2.7.0)",
@@ -42,5 +42,13 @@
   },
   "dependencies": {
     "natural": "8.1.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vnekhai-personal/ingredient-parser-typescript.git"
+  },
+  "homepage": "https://github.com/vnekhai-personal/ingredient-parser-typescript#readme",
+  "bugs": {
+    "url": "https://github.com/vnekhai-personal/ingredient-parser-typescript/issues"
   }
 }

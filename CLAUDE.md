@@ -2,7 +2,7 @@
 
 ## 1. PROJECT IDENTITY & ARCHITECTURE
 
-**ingredient-parser-ts** is a TypeScript port of
+**ingredient-parser-typescript** is a TypeScript port of
 [strangetom/ingredient-parser](https://github.com/strangetom/ingredient-parser) (Python, MIT):
 a CRF sequence labeller that parses English recipe ingredient sentences ("2 tbsp olive oil,
 divided") into structured `ParsedIngredient` data (name, amounts, size, preparation, comment,
@@ -26,7 +26,7 @@ discipline; `docs/QUIRKS.md` for the corrections beyond upstream.
 > approval. `AGENTS.md` enforces.
 
 ```
-ingredient-parser-ts/
+ingredient-parser-typescript/
 ├── src/                  # TS runtime: module ↔ upstream file, 1:1 (+ src/en/data/ generated, gitignored)
 ├── models/               # trained model artifacts — write-once, provenance-recorded; vendored upstream data
 ├── training/             # Python-side retrain + dump + eval pipeline; training/data/ = vendored corpus

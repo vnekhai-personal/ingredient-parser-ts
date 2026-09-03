@@ -1,4 +1,4 @@
-# ingredient-parser-ts
+# ingredient-parser-typescript
 
 A TypeScript port of [strangetom/ingredient-parser](https://github.com/strangetom/ingredient-parser)
 (Python, MIT): a CRF-based parser that turns English recipe ingredient sentences into
@@ -11,7 +11,7 @@ React Native 0.81+ (Hermes), where it parses as the user types, on device, offli
 ## Usage
 
 ```ts
-import { parse_ingredient } from 'ingredient-parser-ts';
+import { parse_ingredient } from 'ingredient-parser-typescript';
 
 const p = parse_ingredient('2 tbsp olive oil, divided');
 p.name[0].text;          // 'olive oil'
@@ -29,7 +29,7 @@ Foundation foods load their assets lazily (about 8 MB of generated modules); cal
 once, then pass the flag:
 
 ```ts
-import { preload_foundation_foods, parse_ingredient } from 'ingredient-parser-ts';
+import { preload_foundation_foods, parse_ingredient } from 'ingredient-parser-typescript';
 await preload_foundation_foods();
 parse_ingredient('1 large red onion', { foundation_foods: true }).foundation_foods[0].fdc_id; // 790577
 ```
@@ -43,7 +43,7 @@ parse_ingredient('1 teaspoon (tsp) salt', { quirks: 'fixed' }).amount[0].unit; /
 parse_ingredient('1 cup flat-leaf parsley', { quirks: 'fixed' }).name[0].text;  // 'flat-leaf parsley' (upstream: 'flat-leaves parsley')
 
 // The model's labels without the postprocessor, for callers that build their own structure.
-import { tag_ingredient } from 'ingredient-parser-ts';
+import { tag_ingredient } from 'ingredient-parser-typescript';
 tag_ingredient('2 tbsp chopped flat-leaf parsley');
 // { tokens: ['2','tbsp','chopped','flat-leaf','parsley'], labels: ['QTY','UNIT','PREP','B_NAME_TOK','I_NAME_TOK'], scores, pos_tags, sentence }
 ```

@@ -184,8 +184,10 @@ test asserting both modes in `tests/quirks/`.
 
 ## 9. Publishing
 
-Distribution: npm, package name `ingredient-parser-ts`. Registry and scope: to be recorded
-here when decided. A release is a model version plus a green parity harness. Package
+Distribution: the public npm registry, unscoped, package name `ingredient-parser-typescript`
+(`ingredient-parser-ts` was already taken by an unrelated package); repository
+https://github.com/vnekhai-personal/ingredient-parser-typescript, public. A release is a model
+version plus a green parity harness. Package
 requirements: pure ESM with types, `sideEffects: false`, semver, the model as an
 uncompressed module (§3.9), foundation-foods assets as a separate lazily imported entry
 point so that Metro, which does not tree-shake, never bundles them for callers that do not
