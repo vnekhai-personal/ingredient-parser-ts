@@ -17,7 +17,7 @@ const p = parse_ingredient('2 tbsp olive oil, divided');
 p.name[0].text;          // 'olive oil'
 p.amount[0].quantity;    // Fraction(2, 1) — exact rational, bigint-backed
 p.amount[0].unit;        // pint-style Unit: tablespoon
-p.comment?.text;         // 'divided'
+p.preparation?.text;     // 'divided'
 
 // Options mirror upstream: separate_names, discard_isolated_stop_words, expect_name_in_output,
 // string_units, volumetric_units_system ('us_customary' | 'imperial' | 'metric' | 'australian' |
