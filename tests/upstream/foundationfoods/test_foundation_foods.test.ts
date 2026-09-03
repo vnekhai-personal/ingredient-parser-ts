@@ -3,7 +3,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 
 import { parse_ingredient } from '../../../src/index.js';
-import { preload_foundation_foods } from '../../../src/en/_loaders.js';
+import { preload_foundation_foods } from '../../../src/foundation-foods.js';
 
 beforeAll(async () => {
   await preload_foundation_foods();

@@ -6,7 +6,8 @@
 // order. Always on for a row sample + the full rankers; every FDC row under HARNESS=full.
 import { describe, expect, it } from 'vitest';
 import { load_embeddings_model } from '../../src/en/_embeddings.js';
-import { load_fdc_rows, load_ff_cache, preload_foundation_foods } from '../../src/en/_loaders.js';
+import { load_fdc_rows, load_ff_cache } from '../../src/en/_loaders.js';
+import { preload_foundation_foods } from '../../src/foundation-foods.js';
 import { BM25, get_bm25_ranker } from '../../src/en/foundationfoods/_bm25.js';
 import { load_fdc_ingredients, tokenize_fdc_description } from '../../src/en/foundationfoods/_ff_utils.js';
 import { get_usif_ranker, uSIF } from '../../src/en/foundationfoods/_usif.js';

@@ -7,7 +7,7 @@ import { existsSync } from 'node:fs';
 import { resolveDump } from './dumps.js';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { preload_foundation_foods } from '../../src/en/_loaders.js';
+import { preload_foundation_foods } from '../../src/foundation-foods.js';
 import { reportLevel3, runLevel3 } from './level3.js';
 
 const ROOT = resolve(import.meta.dirname, '../..');

@@ -25,11 +25,12 @@ p.comment?.text;         // 'divided'
 parse_ingredient('250 mls chicken broth', { custom_units: { mls: 'ml' } }).amount[0].text; // '250 mls'
 ```
 
-Foundation foods load their assets lazily (about 8 MB of generated modules); call the preload
-once, then pass the flag:
+Foundation foods live behind a separate entry point, so their ~8 MB of assets are only bundled
+by apps that import it. Call the preload once, then pass the flag:
 
 ```ts
-import { preload_foundation_foods, parse_ingredient } from 'ingredient-parser-typescript';
+import { parse_ingredient } from 'ingredient-parser-typescript';
+import { preload_foundation_foods } from 'ingredient-parser-typescript/foundation-foods';
 await preload_foundation_foods();
 parse_ingredient('1 large red onion', { foundation_foods: true }).foundation_foods[0].fdc_id; // 790577
 ```

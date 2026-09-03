@@ -1,7 +1,6 @@
 {
   "name": "ingredient-parser-typescript",
-  "version": "0.0.0",
-  "private": true,
+  "version": "0.1.0",
   "description": "Bit-parity TypeScript port of strangetom/ingredient-parser (pinned at ffd6ae3, release 2.7.0)",
   "license": "MIT",
   "type": "module",
@@ -11,6 +10,7 @@
   },
   "exports": {
     ".": "./dist/index.js",
+    "./foundation-foods": "./dist/foundation-foods.js",
     "./en": "./dist/en/index.js",
     "./en/*": "./dist/en/*.js",
     "./en/foundationfoods": "./dist/en/foundationfoods/index.js",
@@ -50,5 +50,6 @@
   "homepage": "https://github.com/vnekhai-personal/ingredient-parser-typescript#readme",
   "bugs": {
     "url": "https://github.com/vnekhai-personal/ingredient-parser-typescript/issues"
-  }
+  },
+  "sideEffects": false
 }

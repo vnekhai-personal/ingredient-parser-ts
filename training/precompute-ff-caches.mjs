@@ -37,6 +37,7 @@ const ROOTS = [
   'src/en/foundationfoods/_usif.ts',
   'src/en/foundationfoods/_bm25.ts',
   'src/en/_loaders.ts',
+  'src/foundation-foods.ts',
 ];
 const STUB = "import type { FFCacheRaw } from '../_loaders.js';\nexport const FFCACHE: FFCacheRaw | null = null;\n";
 
@@ -101,12 +102,13 @@ console.log(`built runtime into ${rel(BUILD_DIR)} (${((performance.now() - t0) /
 
 const mod = (p) => import(pathToFileURL(resolve(BUILD_DIR, p)).href);
 const loaders = await mod('en/_loaders.js');
+const ffEntry = await mod('foundation-foods.js');
 const ffUtils = await mod('en/foundationfoods/_ff_utils.js');
 const { uSIF } = await mod('en/foundationfoods/_usif.js');
 const { BM25 } = await mod('en/foundationfoods/_bm25.js');
 const { load_embeddings_model } = await mod('en/_embeddings.js');
 
-await loaders.preload_foundation_foods();
+await ffEntry.preload_foundation_foods();
 if (loaders.load_ff_cache() !== null) throw new Error('scratch build loaded a cache; expected the stub');
 const t1 = performance.now();
 const rows = loaders.load_fdc_rows();

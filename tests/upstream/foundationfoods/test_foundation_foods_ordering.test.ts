@@ -4,7 +4,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 
 import { LabelledToken } from '../../../src/dataclasses.js';
 import { PostProcessor } from '../../../src/en/index.js';
-import { preload_foundation_foods } from '../../../src/en/_loaders.js';
+import { preload_foundation_foods } from '../../../src/foundation-foods.js';
 
 beforeAll(async () => {
   await preload_foundation_foods();

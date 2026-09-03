@@ -26,7 +26,7 @@ export function load_parser_model(): NumpyCRFInference {
 
 // ---- foundation-foods assets (lazy) ----
 // Upstream loads the GloVe file and FDC csv on first use (lru_cache). JavaScript cannot block
-// on a lazy import, so consumers call `await preload_foundation_foods()` once before passing
+// on a lazy import, so consumers call `await preload_foundation_foods()` (the `foundation-foods` entry point) once before passing
 // `foundation_foods: true`; the sync loaders below then behave like upstream's cached ones.
 // Consumers that never do so pay nothing (docs/PORTING.md step 4).
 //
@@ -111,7 +111,7 @@ const B64_LOOKUP = new Int16Array(128).fill(-1);
 for (let i = 0; i < B64.length; i++) B64_LOOKUP[B64.charCodeAt(i)] = i;
 
 /** Standard base64 → bytes, pure JS (no `atob`/`Buffer`, so it runs on any engine). */
-function decodeBase64(b64: string): Uint8Array {
+export function decodeBase64(b64: string): Uint8Array {
   let len = b64.length;
   while (len > 0 && b64.charCodeAt(len - 1) === 61) len -= 1; // trailing '='
   const out = new Uint8Array(Math.floor((len * 3) / 4));
@@ -134,7 +134,7 @@ function decodeBase64(b64: string): Uint8Array {
 const HOST_LITTLE_ENDIAN = new Uint8Array(new Uint16Array([1]).buffer)[0] === 1;
 
 /** Little-endian float32 payload → Float32Array (a view when the host is little-endian, else converted). */
-function decodeFloat32LE(b64: string): Float32Array {
+export function decodeFloat32LE(b64: string): Float32Array {
   const bytes = decodeBase64(b64);
   const n = Math.floor(bytes.byteLength / 4);
   if (HOST_LITTLE_ENDIAN && bytes.byteOffset % 4 === 0) return new Float32Array(bytes.buffer, bytes.byteOffset, n);
@@ -145,7 +145,7 @@ function decodeFloat32LE(b64: string): Float32Array {
 }
 
 /** Little-endian float64 payload → Float64Array. */
-function decodeFloat64LE(b64: string): Float64Array {
+export function decodeFloat64LE(b64: string): Float64Array {
   const bytes = decodeBase64(b64);
   const n = Math.floor(bytes.byteLength / 8);
   if (HOST_LITTLE_ENDIAN && bytes.byteOffset % 8 === 0) return new Float64Array(bytes.buffer, bytes.byteOffset, n);
@@ -156,7 +156,7 @@ function decodeFloat64LE(b64: string): Float64Array {
 }
 
 /** Little-endian uint16 payload → Uint16Array. */
-function decodeUint16LE(b64: string): Uint16Array {
+export function decodeUint16LE(b64: string): Uint16Array {
   const bytes = decodeBase64(b64);
   const n = Math.floor(bytes.byteLength / 2);
   if (HOST_LITTLE_ENDIAN && bytes.byteOffset % 2 === 0) return new Uint16Array(bytes.buffer, bytes.byteOffset, n);
@@ -182,32 +182,6 @@ export function decode_ff_cache(raw: FFCacheRaw | null): FFCache | null {
   };
 }
 
-/** Load the embeddings, FDC and precomputed-cache assets (dynamic imports of the generated modules). Idempotent. */
-export async function preload_foundation_foods(): Promise<void> {
-  if (GLOVE !== null && FDC !== null) return;
-  const [glove, fdc, ffcache] = await Promise.all([
-    import('./data/glove.en.js'),
-    import('./data/fdc.en.js'),
-    import('./data/ffcache.en.js'),
-  ]);
-  const vectors = decodeFloat32LE(glove.VECTORS_B64);
-  if (vectors.length !== glove.VOCAB.length * glove.DIMENSION) throw new Error('glove asset: vector payload size mismatch');
-  const cache = decode_ff_cache(ffcache.FFCACHE);
-  if (cache !== null) {
-    // The cache is only meaningful for the exact assets it was derived from (`pnpm model`
-    // regenerates all three together); a mismatch is a build inconsistency, never a fallback.
-    if (cache.raw.glove_sha256 !== glove.SHA256 || cache.raw.fdc_sha256 !== fdc.SHA256) {
-      throw new Error('foundation foods cache (data/ffcache.en.ts) was built from different assets: run `pnpm model`');
-    }
-    if (cache.raw.dimension !== glove.DIMENSION || cache.raw.entries + cache.raw.skipped_rows.length !== fdc.FDC_ROWS.length) {
-      throw new Error('foundation foods cache (data/ffcache.en.ts) does not match the assets: run `pnpm model`');
-    }
-  }
-  GLOVE = { vocab: glove.VOCAB, vocab_size: glove.VOCAB_SIZE, dimension: glove.DIMENSION, vectors };
-  FDC = fdc.FDC_ROWS;
-  FFCACHE = cache;
-}
-
 /** Inject assets directly (tests / custom bundling). Without `ffcache` the rankers compute their caches. */
 export function set_foundation_foods_assets(glove: GloVeAsset, fdc: readonly FDCRow[], ffcache: FFCache | null = null): void {
   GLOVE = glove;
@@ -215,7 +189,7 @@ export function set_foundation_foods_assets(glove: GloVeAsset, fdc: readonly FDC
   FFCACHE = ffcache;
 }
 
-const NOT_LOADED = 'foundation foods assets are not loaded: `await preload_foundation_foods()` before parsing with foundation_foods=true';
+const NOT_LOADED = 'foundation foods assets are not loaded: `await preload_foundation_foods()` from "ingredient-parser-typescript/foundation-foods" before parsing with foundation_foods=true';
 
 /** `load_embeddings_model()` (GloVeModel wrapper, cached) lives in src/en/_embeddings.ts; re-exported here as upstream. */
 export { load_embeddings_model } from './_embeddings.js';

@@ -4,7 +4,9 @@ export { UREG } from './_pint.js';
 export { inspect_parser, parse_ingredient, parse_multiple_ingredients, tag_ingredient } from './parsers.js';
 export type { Quirks, TaggedIngredient } from './en/index.js';
 export type { ParseIngredientOptions } from './parsers.js';
-export { preload_foundation_foods, set_parser_model, set_foundation_foods_assets } from './en/_loaders.js';
+export { set_parser_model, set_foundation_foods_assets } from './en/_loaders.js';
+// `preload_foundation_foods` lives in the separate entry point `ingredient-parser-typescript/foundation-foods`
+// so that bundles built from this module never contain the ~8 MB of foundation-foods data.
 export { show_model_card } from './_common.js';
 export const __version__ = '2.7.0';
 

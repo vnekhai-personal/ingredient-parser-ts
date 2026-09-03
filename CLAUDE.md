@@ -111,8 +111,9 @@ convention, relevant file paths, and what harness level must pass after.
   (`(",", ":")` / default `JSON.stringify`), raw unicode (`ensure_ascii=False`). This
   convention has already eaten two real bugs; do not renegotiate it.
 - **Asset strategy:** CRF model eager as an uncompressed generated module (~1.8 MB raw; Hermes has
-  no zlib); foundation-foods assets lazy behind `preload_foundation_foods()`, so callers that
-  never pass `foundation_foods: true` pay nothing.
+  no zlib); foundation-foods assets referenced only from the `./foundation-foods` entry point
+  (`src/foundation-foods.ts`, `preload_foundation_foods()`), so bundles built from the main entry
+  never contain them on any bundler.
 - **Anti-duplication:** before adding a utility, check whether upstream has the same logic
   elsewhere in the pipeline — port the shared shape once.
 

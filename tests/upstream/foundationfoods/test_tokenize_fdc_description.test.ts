@@ -2,7 +2,7 @@
 // Do not edit expectations here — they are upstream's. See tests/upstream/README.md.
 import { beforeAll, describe, it, expect } from 'vitest';
 
-import { preload_foundation_foods } from '../../../src/en/_loaders.js';
+import { preload_foundation_foods } from '../../../src/foundation-foods.js';
 import {
   TokenizedFDCDescription,
   tokenize_fdc_description,

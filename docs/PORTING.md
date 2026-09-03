@@ -67,8 +67,9 @@ adopted deliberately; nothing is contributed back.
    of upstream. It is not part of the published package.
 9. **Model asset ships uncompressed** as a generated JavaScript module holding the JSON
    literal (~1.8 MB raw). Hermes has no zlib; a decision made for React Native rather than
-   discovered there. Foundation-foods assets are generated modules loaded lazily by
-   `preload_foundation_foods()`.
+   discovered there. Foundation-foods assets are generated modules referenced only from the
+   separate entry point `ingredient-parser-typescript/foundation-foods` (`preload_foundation_foods()`),
+   so bundles built from the main entry never contain them, on any bundler.
 10. **Only `natural` 8.1.1 is a runtime dependency**, deep-imported (the Brill tagger and the
     Porter stemmer modules only; the package root pulls Node-only modules).
 
@@ -189,6 +190,6 @@ Distribution: the public npm registry, unscoped, package name `ingredient-parser
 https://github.com/vnekhai-personal/ingredient-parser-typescript, public. A release is a model
 version plus a green parity harness. Package
 requirements: pure ESM with types, `sideEffects: false`, semver, the model as an
-uncompressed module (§3.9), foundation-foods assets as a separate lazily imported entry
-point so that Metro, which does not tree-shake, never bundles them for callers that do not
-use them.
+uncompressed module (§3.9), foundation-foods assets behind the separate entry point (done:
+`./foundation-foods`, so Metro, which does not tree-shake, never bundles them for callers that
+do not import it).

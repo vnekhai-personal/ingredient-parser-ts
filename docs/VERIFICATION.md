@@ -116,8 +116,9 @@ the 7.2 MB of foundation-foods modules, Metro does not.
 - **Integer-like custom-unit keys.** A plain JS object cannot preserve insertion order for keys
   like `"2"`; the units table follows Python's merge order otherwise. Identical on every tested
   dictionary; a dictionary where two such pairs share a singular could still order differently.
-- **API deviations, by necessity.** Foundation-food assets load lazily: call
-  `await preload_foundation_foods()` once before `foundation_foods: true`. `show_model_card()`
+- **API deviations, by necessity.** Foundation-food assets load lazily from the separate entry
+  point `ingredient-parser-typescript/foundation-foods`: call `await preload_foundation_foods()`
+  once before `foundation_foods: true`. `show_model_card()`
   throws (no model card file is shipped). `JSON.stringify` on a parse result throws on the
   bigint `Fraction`; use its `toString()` or a replacer.
 - **Expected upstream-test failures (9), kept verbatim and marked as such**: three

@@ -16,7 +16,8 @@ parity status. A module's status changes only with harness evidence (docs/VERIFI
 | `src/en/postprocess.ts` | `en/postprocess.py` | **Level 3 PASS** (2026-09-02) | 81,523 / 81,523; 16 upstream test files 118/118 |
 | `src/en/parser.ts` | `en/parser.py` | **Level 3 PASS** | parser tests 38/40 + 2 model-delta `it.fails` |
 | `src/parsers.ts` | `parsers.py` (`parse_ingredient`, `parse_multiple_ingredients`, `inspect_parser`) | **Level 3 PASS** | — |
-| `src/en/_loaders.ts` | `en/_loaders.py` | n/a | model asset = generated `src/en/data/model.en.ts`; `preload_foundation_foods()` lazy-imports `glove.en.ts`, `fdc.en.ts`, `ffcache.en.ts` (`pnpm model`) |
+| `src/en/_loaders.ts` | `en/_loaders.py` | n/a | model asset = generated `src/en/data/model.en.ts`; asset registry for foundation foods |
+| `src/foundation-foods.ts` | (entry point `./foundation-foods`) | n/a | the only module referencing `glove.en.ts`, `fdc.en.ts`, `ffcache.en.ts`; `preload_foundation_foods()` dynamic-imports them (`pnpm model`) |
 | `src/en/foundationfoods/_ff_dataclasses.ts`, `_ff_constants.ts`, `_ff_utils.ts`, `_bm25.ts` | `en/foundationfoods/` same stems | **ported** (2026-09-02) | FDC loading byte-identical (11,362 rows: tokens, embedding tokens, weights); BM25 scores identical; 8 upstream tests green + 3 tagger-delta `it.fails` |
 | `src/en/foundationfoods/_usif.ts`, `_fuzzy.ts`, `_foundationfoods.ts` | `en/foundationfoods/` same stems | **ported**, level 3 (FF) measured — see below | 36 / 37 end-to-end tests (1 tagger+model delta); uSIF constants bit-identical |
 | `src/en/_embeddings.ts` | `en/_embeddings.py` (`GloVeModel`; `_binarize_vectors` unused upstream, not ported) | ported | — |
