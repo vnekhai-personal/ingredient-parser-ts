@@ -25,7 +25,8 @@ project's MIT licence. Authorship of the project remains with the maintainer.
 - Model files are write-once; a new model is a new file with a `docs/MODELS.md` entry made
   by the recorded pipeline. Generated files (`src/en/data/*`, `src/en/_constants.ts`,
   `src/en/_pintRegistry.ts`, `src/en/_htmlEntities.ts`) are never edited by hand.
-- No runtime dependency beyond `natural` 8.1.1, no Node-only APIs in `src/`.
+- No runtime dependencies (`natural` 8.1.1 is a devDependency: the reference the vendored tagger
+  and stemmer are tested against), no Node-only APIs in `src/`.
 
 `CLAUDE.md` and `AGENTS.md` are the working rules for anyone, human or agent, changing the
 code; `docs/PORTING.md` explains the decisions behind them.

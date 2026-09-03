@@ -5,13 +5,13 @@
 //
 // The values are produced by the SAME runtime code the port ships — `tokenize_fdc_description`
 // over every FDC row, the `uSIF` and `BM25` constructors — compiled with tsc into a scratch
-// directory (node_modules/.cache/, so `natural` resolves) and run with the assets preloaded and
+// directory (node_modules/.cache/) and run with the assets preloaded and
 // the cache disabled. tests/harness/ffcache.test.ts recomputes them at runtime and asserts they
 // are identical (typed arrays byte-equal, Maps entry-equal in order).
 //
 // Invalidation: the marker line records sha256 over every input — the two gz data files, every
 // source module in the import closure of the computation (so a code change regenerates the
-// cache), natural's version (tagger) and this script. Up to date -> no-op.
+// cache), the vendored tagger data and this script. Up to date -> no-op.
 //
 // Stored: the tokenized FDC descriptions (string tables + index arrays), the uSIF sentence
 // vectors + norms (float32 LE) and token_prob / min_prob / a, the BM25 idf table + avgdl.
@@ -64,18 +64,15 @@ function sourceClosure(roots) {
   return [...seen].sort();
 }
 
-const naturalVersion = JSON.parse(readFileSync(resolve(ROOT, 'node_modules/natural/package.json'), 'utf8')).version;
-// The Brill lexicon + rules the tokenizer's POS tags come from, and the generator of glove/fdc modules.
-const naturalData = ['lexicon_from_posjs.json', 'tr_from_posjs.txt'].map((f) =>
-  resolve(ROOT, 'node_modules/natural/lib/natural/brill_pos_tagger/data/English', f),
-);
+// The vendored Brill lexicon + rules the tokenizer's POS tags come from (models/natural/README.md; the
+// tagger and stemmer code is in the source closure), and the generator of the glove/fdc modules.
+const brillData = ['lexicon_from_posjs.json.gz', 'tr_from_posjs.txt'].map((f) => resolve(ROOT, 'models/natural', f));
 const EXTRACT_FF = resolve(ROOT, 'training/extract-ff-assets.mjs');
 const inputs = [
   [rel(GLOVE_GZ), sha(readFileSync(GLOVE_GZ))],
   [rel(FDC_GZ), sha(readFileSync(FDC_GZ))],
   ...sourceClosure(ROOTS).map((f) => [rel(f), sha(readFileSync(f))]),
-  ['natural', naturalVersion],
-  ...naturalData.map((f) => [rel(f), sha(readFileSync(f))]),
+  ...brillData.map((f) => [rel(f), sha(readFileSync(f))]),
   [rel(EXTRACT_FF), sha(readFileSync(EXTRACT_FF))],
   [rel(SELF), sha(readFileSync(SELF))],
 ];

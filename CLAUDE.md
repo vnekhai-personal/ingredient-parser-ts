@@ -9,8 +9,8 @@ divided") into structured `ParsedIngredient` data (name, amounts, size, preparat
 purpose, foundation foods). Read `docs/PORTING.md` before any work: decisions, parity
 discipline; `docs/QUIRKS.md` for the corrections beyond upstream.
 
-- **Why TS:** the runtime has zero native dependencies — quantized CRF weights in JSON and a
-  Viterbi loop — so it runs everywhere JS runs, including React Native/Hermes, for as-you-type,
+- **Why TS:** the runtime has zero dependencies — quantized CRF weights in JSON, a Viterbi
+  loop, an in-repo tagger and stemmer — so it runs everywhere JS runs, including React Native/Hermes, for as-you-type,
   on-device, offline parsing.
 - **Scope:** the whole library, `foundationfoods/` included. The default output is upstream's
   `ParsedIngredient`, byte-identical at the pin.
@@ -28,7 +28,8 @@ discipline; `docs/QUIRKS.md` for the corrections beyond upstream.
 ```
 ingredient-parser-typescript/
 ├── src/                  # TS runtime: module ↔ upstream file, 1:1 (+ src/en/data/ generated, gitignored)
-├── models/               # trained model artifacts — write-once, provenance-recorded; vendored upstream data
+├── models/               # trained model artifacts — write-once, provenance-recorded; vendored upstream data;
+│                         # models/natural/ = natural 8.1.1's Brill lexicon + rules (README records the licence chain)
 ├── training/             # Python-side retrain + dump + eval pipeline; training/data/ = vendored corpus
 ├── fixtures/             # probe-recipes.json — 107 real lines / 10 recipes, trap-annotated
 ├── tests/                # vitest: upstream/ (pytest recreated verbatim), harness/, goldens/ (samples +
@@ -42,8 +43,8 @@ ingredient-parser-typescript/
 ### Key commands
 ```bash
 pnpm install && pnpm typecheck && pnpm test   # suite incl. committed samples; no Python needed
-pnpm model                                    # generated assets: model.en.ts (CRF), glove.en.ts + fdc.en.ts (lazy FF),
-                                              # ffcache.en.ts (precomputed FDC caches, ~5 s when stale)
+pnpm model                                    # generated assets: brill.en.ts (tagger data), model.en.ts (CRF), glove.en.ts +
+                                              # fdc.en.ts (lazy FF), ffcache.en.ts (precomputed FDC caches, ~5 s when stale)
 HARNESS=full pnpm harness                     # every parity level: root *.jsonl if present, else the committed
                                               # tests/goldens/parity/*.jsonl.gz
 EVAL=1 pnpm exec vitest run tests/eval        # primitive goldens vs CPython/numpy/pint
@@ -70,7 +71,8 @@ Read existing code before making changes. Understand the pattern. Reuse before i
 - A settled decision (`docs/PORTING.md` §3) looks wrong — bring evidence, don't relitigate silently
 - Changing the upstream pin, publishing anything, or altering the default (parity) output
 - Accepting an accuracy regression beyond the recorded deltas
-- Adding a runtime dependency beyond `natural` (pinned 8.1.1)
+- Adding any runtime dependency (there are none; `natural` 8.1.1 is a devDependency: the
+  reference the vendored tagger and stemmer are diffed against, and the training maps)
 - Deleting or rewriting any frozen model artifact or committed reference dump
 - A workaround is needed — verify it's intentional first
 
@@ -111,7 +113,8 @@ convention, relevant file paths, and what harness level must pass after.
   (`(",", ":")` / default `JSON.stringify`), raw unicode (`ensure_ascii=False`). This
   convention has already eaten two real bugs; do not renegotiate it.
 - **Asset strategy:** CRF model eager as an uncompressed generated module (~1.8 MB raw; Hermes has
-  no zlib); foundation-foods assets referenced only from the `./foundation-foods` entry point
+  no zlib); Brill lexicon + rules eager as a generated module (~1 MB, `src/en/data/brill.en.ts`
+  from `models/natural/`); foundation-foods assets referenced only from the `./foundation-foods` entry point
   (`src/foundation-foods.ts`, `preload_foundation_foods()`), so bundles built from the main entry
   never contain them on any bundler.
 - **Anti-duplication:** before adding a utility, check whether upstream has the same logic
@@ -125,7 +128,9 @@ Violating any invariant is an incident, not a judgment call.
   one-character divergence degrades accuracy silently. Any code producing a feature value is
   inside the parity boundary and must pass the differential harness.
 - **I2 — The linguistic components used at inference MUST be the ones used at training.**
-  Tagger and stemmer changes require a retrain and a recorded evaluation. Never mix.
+  Tagger and stemmer changes require a retrain and a recorded evaluation. Never mix. The
+  runtime's tagger and stemmer (`src/en/_brill.ts`, `_porter.ts`) are reproductions of natural
+  8.1.1 kept identical by `tests/harness/linguistics.test.ts`; a divergence there is a bug.
 - **I3 — Models are artifacts of a replayable pipeline.** Never hand-edit a model file. Every
   shipped model records: corpus, tagger, stemmer, seed, split, accuracy numbers, and the
   command that made it (`docs/MODELS.md`).
@@ -210,8 +215,9 @@ entries stay in the ledgers with what changed. If a reader cannot replay it, the
 
 ### State
 The whole library is ported and verified (`docs/VERIFICATION.md`); the parity version is tagged
-`v2.7.0-parity`; the first corrections beyond upstream are in (`quirks: 'fixed'`, `tag_ingredient`).
-Next: packaging and publishing (`docs/PORTING.md` §9 — registry and scope to record).
+`v2.7.0-parity`; the first corrections beyond upstream are in (`quirks: 'fixed'`, `tag_ingredient`);
+0.1.0 is published (npm `ingredient-parser-typescript`, GitHub release v0.1.0). Since then: the
+`natural` dependency is vendored (0.2.0, to publish).
 
 ### Measured facts (do not re-derive; update in the same change that changes them)
 | Fact | Value |
@@ -223,14 +229,15 @@ Next: packaging and publishing (`docs/PORTING.md` §9 — registry and scope to 
 | SHIP MODEL `models/brill-porter-full.json.gz` | same components, all 81,359 lines, no split (690 iters, 22.5 min, 339 KB gz, 37,134 state features). No fair held-out number exists; train-set score on the split is 97.57/99.22 and is NOT accuracy. Switch = `training/ship-model.sh` |
 | Rejected taggers | `pos` (= natural's Brill data), `compromise` (own tokenizer, ~mid-80s PTB), `wink-nlp` (own tokenizer, UD tags; ceiling is the 0.14pt) |
 | Retrain cycle | ≈15–20 min on M-series (632–719 L-BFGS iterations); `training/retrain.sh` |
-| Model size | ship: 339 KB gz / ~1.8 MB raw JSON; 17,454 attributes × 12 labels, 37,134 state features; GloVe FF asset ~3.4 MB gz (lazy) |
+| Model size | ship: 339 KB gz / ~1.8 MB raw JSON; 17,454 attributes × 12 labels, 37,134 state features; Brill asset 0.97 MB raw (92,661 words, 71 categories, 18 rules); GloVe FF asset ~3.4 MB gz (lazy) |
+| Runtime dependencies | none (2026-09-03; `natural` vendored: tagger reimplemented, stemmer ported, identical over 81,523 corpus/fixture token lists + 11,371 FDC descriptions + adversarial sets). Parser-only bundle 3.3 MB raw / 0.87 MB gz (0.1.0: 7.9 / 1.09); consumer install 1 package / 12 MB (0.1.0: 48 packages / 86 MB) |
 | Decoder (level 1) | 16,272 seq / 117,369 tokens, labels exact, confidences bit-exact 98.8%, max diff 2.8e-14 |
 | Features (level 2) | 16,272 seqs recomputed from text, 0 mismatches; 81,416 corpus + 107 fixture lines, 0 hash mismatches |
 | Output (level 3) | 81,523 / 81,523 `ParsedIngredient` byte-identical; API 107 / 107; 92 option combinations 0; ~60,000 adversarial lines 0 |
 | Foundation foods (level 3 FF) | 81,523 lines; 0 semantic mismatches; 3,456 (4.24%) confidence-only ≤9.3e-5, 3,396 of those exactly 1e-6 (float32 seam + upstream's hash-order variance); Snowball 13,839/13,839; caches identical on all 11,362 entries |
-| Suite | `pnpm test` 472 passed / 8 skipped (6 `HARNESS=full` gates, Snowball gate, model card); 27 skipped counting the 20 `EVAL=1` cases; upstream 45 files / 458 cases with 9 documented `it.fails` deltas |
-| Hermes (RN 0.81.5) | 4,814 / 4,814 parses byte-identical to Node; plain parse ~5 ms CPU, FF parse ~60 ms, preload 1–3 s; first FF parse 0.17 s with precomputed caches |
-| Stemmer | SETTLED — natural 8.1.1 vanilla `PorterStemmer` (upstream: NLTK Snowball); differs on 5.2% of vocab / 2.3% of token occurrences, costs ~0pt |
+| Suite | `pnpm test` 481 passed / 9 skipped (7 `HARNESS=full` gates, Snowball gate, model card); 29 skipped counting the 20 `EVAL=1` cases; upstream 45 files / 458 cases with 9 documented `it.fails` deltas |
+| Hermes (RN 0.81.5) | 4,814 / 4,814 parses byte-identical to Node (re-verified on the vendored-tagger build); plain parse ~5 ms CPU, FF parse ~60 ms, preload 1–3 s; first FF parse 0.17 s with precomputed caches |
+| Stemmer | SETTLED — natural 8.1.1 vanilla `PorterStemmer` (upstream: NLTK Snowball), ported in `src/en/_porter.ts`; differs from Snowball on 5.2% of vocab / 2.3% of token occurrences, costs ~0pt |
 
 ### Quick glossary
 - **Pin** — the upstream commit all parity targets (`ffd6ae3`, release 2.7.0).

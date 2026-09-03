@@ -1,7 +1,14 @@
 {
   "name": "ingredient-parser-typescript",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Bit-parity TypeScript port of strangetom/ingredient-parser (pinned at ffd6ae3, release 2.7.0)",
+  "keywords": [
+    "parser",
+    "ingredients",
+    "recipe",
+    "units",
+    "nutrition"
+  ],
   "license": "MIT",
   "type": "module",
   "packageManager": "pnpm@11.25.0",
@@ -25,10 +32,11 @@
   "files": [
     "dist",
     "LICENSE",
-    "LICENSE.upstream"
+    "LICENSE.upstream",
+    "LICENSE.natural"
   ],
   "scripts": {
-    "model": "node training/extract-model.mjs && node training/extract-ff-assets.mjs && node training/precompute-ff-caches.mjs",
+    "model": "node training/extract-brill.mjs && node training/extract-model.mjs && node training/extract-ff-assets.mjs && node training/precompute-ff-caches.mjs",
     "build": "pnpm model && rm -rf dist && tsc -p tsconfig.build.json",
     "typecheck": "pnpm model && tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json",
     "test": "pnpm model && vitest run",
@@ -38,9 +46,7 @@
   "devDependencies": {
     "@types/node": "^22.15.0",
     "typescript": "^5.8.0",
-    "vitest": "^3.2.0"
-  },
-  "dependencies": {
+    "vitest": "^3.2.0",
     "natural": "8.1.1"
   },
   "repository": {

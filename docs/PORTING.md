@@ -39,12 +39,15 @@ adopted deliberately; nothing is contributed back.
    natural's Brill tags instead of NLTK's perceptron tags costs 0.14 pt sentence accuracy
    (94.59% vs 94.73%; token 97.90% vs 97.97%; 81,416-sentence corpus, seed 42, 20% held out).
    Rejected: `pos` (same data as natural's Brill), `compromise` (own tokenizer, non-PTB
-   tags, lower accuracy), `wink-nlp` (own tokenizer, coarser UD tags).
+   tags, lower accuracy), `wink-nlp` (own tokenizer, coarser UD tags). The tagger is reproduced
+   inside the port (`src/en/_brill.ts`, lexicon and rules vendored under `models/natural/`) and
+   verified identical to natural 8.1.1 (VERIFICATION.md §2).
 3. **Stemmer = natural's vanilla Porter stemmer.** Upstream stems with NLTK's Snowball
    `EnglishStemmer`, which no JS library implements. Retraining with Brill tags and Porter
    stems costs 0.13 pt sentence accuracy against the NLTK baseline (94.60% vs 94.73%) and is
    indistinguishable from the Brill-only model. The two stemmers disagree on 5.2% of the
-   vocabulary and 2.3% of corpus token occurrences.
+   vocabulary and 2.3% of corpus token occurrences. The stemmer is ported step for step
+   (`src/en/_porter.ts`) and verified identical to natural 8.1.1.
 4. **The tagger and stemmer used at inference must be the ones used at training.** Any
    change to a linguistic component means a retrain (§6) and a recorded evaluation.
 5. **Ship model = a full-data retrain with the same components.** `models/brill-porter.json.gz`
@@ -70,8 +73,14 @@ adopted deliberately; nothing is contributed back.
    discovered there. Foundation-foods assets are generated modules referenced only from the
    separate entry point `ingredient-parser-typescript/foundation-foods` (`preload_foundation_foods()`),
    so bundles built from the main entry never contain them, on any bundler.
-10. **Only `natural` 8.1.1 is a runtime dependency**, deep-imported (the Brill tagger and the
-    Porter stemmer modules only; the package root pulls Node-only modules).
+10. **No runtime dependency.** Up to 0.1.0 `natural` 8.1.1 was the one dependency, deep-imported
+    for its Brill tagger and Porter stemmer; its package root nevertheless put 47 transitive
+    packages (database clients, dotenv, WordNet data) into every consumer install and bundled
+    its English data as 4.6 MB of JSON. The two components are now reproduced in the port
+    (§3.2–3.3; data vendored in `models/natural/`, generated into `src/en/data/brill.en.ts`)
+    and diffed live against natural 8.1.1, which stays a devDependency for that test and for the
+    training maps. Measured on the parser-only bundle: 7.9 → 3.3 MB of JS, 1.09 → 0.87 MB
+    gzipped; a consumer install: 48 packages / 86 MB → 1 package / 12 MB.
 
 ## 4. Parity discipline
 
@@ -96,6 +105,9 @@ checklist:
   reorder integer-like keys.
 - Stemmer pairing: CRF features use natural's Porter stems; the foundation-foods matcher
   stems with a verified port of NLTK's Snowball stemmer because its tables are Snowball stems.
+- Vendored linguistic components: the tagger and stemmer are in-repo reproductions of natural
+  8.1.1, diffed against it over every corpus token list, every FDC description and adversarial
+  tokens (`tests/harness/linguistics.test.ts`); a change to either is a retrain (§3.4).
 - Engine floating point: `Math.exp`/`Math.log`/`Math.pow` differ from macOS libm by an ulp,
   which reaches confidences at ≤2.8e-14 and one BM25 idf value in 2,645. Apple Accelerate's
   float32 `sdot` is not reproducible even across Python processes; the port computes dots as
@@ -169,8 +181,11 @@ the register or trap each exercises (US standard, dotted units, compound amounts
 comma-less metric, folk prose, page-chrome junk, unicode fractions, colon-editorial). Their
 goldens are generated from the pin, never written by hand.
 
-Upstream code and model: MIT (Tom Strange) — `LICENSE.upstream`, attribution kept. `natural`:
-MIT. NLTK (Apache 2.0) is training-side only. The vendored corpus is upstream's public file;
+Upstream code and model: MIT (Tom Strange) — `LICENSE.upstream`, attribution kept. `natural`
+8.1.1 (MIT): the Porter stemmer port and the vendored Brill lexicon and rules, whose own origin
+is pos-js (LGPLv3) — `LICENSE.natural`, `models/natural/README.md`. natural's tagger sources
+(GPL-3.0 headers) are not copied; `src/en/_brill.ts` is an independent implementation of the
+same behaviour. NLTK (Apache 2.0) is training-side only. The vendored corpus is upstream's public file;
 its sentences were scraped from the sources named in `training/data/README.md` and remain
 theirs; it is not part of the published package.
 

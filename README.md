@@ -5,8 +5,8 @@ A TypeScript port of [strangetom/ingredient-parser](https://github.com/strangeto
 structured data — name, amounts, size, preparation, comment, purpose, and optional
 foundation-food (USDA FDC) matches.
 
-Pure ESM, no native dependencies, no Node-only APIs: it runs in Node, in browsers and on
-React Native 0.81+ (Hermes), where it parses as the user types, on device, offline.
+Pure ESM, zero runtime dependencies, no native code, no Node-only APIs: it runs in Node, in
+browsers and on React Native 0.81+ (Hermes), where it parses as the user types, on device, offline.
 
 ## Usage
 
@@ -69,8 +69,9 @@ terms: upstream is tracked and its changes adopted deliberately, while correctio
 ## Model
 
 The shipped model is a CRF retrained with the port's own linguistic components — the Brill
-tagger and Porter stemmer from the `natural` package, the one runtime dependency — on all
-81,359 usable corpus lines. The accuracy estimate for that configuration is the same
+tagger and Porter stemmer of the `natural` package, reproduced inside the port from vendored
+data and verified identical to it, so nothing is installed alongside — on all 81,359 usable
+corpus lines. The accuracy estimate for that configuration is the same
 components trained with 20% held out: 94.60% of sentences and 97.90% of tokens exact, against
 94.73% / 97.97% for upstream's NLTK components retrained on the same split. Provenance of
 every artifact: [docs/MODELS.md](docs/MODELS.md).
@@ -100,5 +101,7 @@ Ported, verified, in production use. Single maintainer, discretionary maintenanc
 ## License
 
 MIT. Upstream code, model and data are MIT © Tom Strange (`LICENSE.upstream`); this port keeps
-that attribution. `natural` is MIT. The FDC descriptions derive from USDA FoodData Central
-(public domain).
+that attribution. The Porter stemmer port and the vendored Brill lexicon and rules derive from
+`natural` 8.1.1 (MIT); the lexicon's own origin is pos-js (LGPLv3) — `LICENSE.natural` and
+`models/natural/README.md` record the chain. The FDC descriptions derive from USDA FoodData
+Central (public domain).

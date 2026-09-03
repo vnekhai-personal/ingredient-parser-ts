@@ -1,5 +1,5 @@
-// Minimal type surface of `natural` 8.1.1 used by the port (the package's own typings pull a
-// .ts source into the type-check). Mapped via tsconfig `paths`; runtime import is unchanged.
+// Minimal typings for natural/lib/natural/brill_pos_tagger/index.js (CJS module.exports object) —
+// the reference implementation tests/harness/linguistics.test.ts diffs the vendored tagger against.
 export class Lexicon {
   constructor(language: string, defaultCategory: string, defaultCategoryCapitalised?: string);
 }
@@ -17,14 +17,9 @@ export class BrillPOSTagger {
   constructor(lexicon: Lexicon, ruleSet: RuleSet);
   tag(tokens: string[]): BrillPOSSentence;
 }
-export interface Stemmer {
-  stem(token: string): string;
-}
-export const PorterStemmer: Stemmer;
-declare const natural: {
+declare const brill: {
   Lexicon: typeof Lexicon;
   RuleSet: typeof RuleSet;
   BrillPOSTagger: typeof BrillPOSTagger;
-  PorterStemmer: Stemmer;
 };
-export default natural;
+export default brill;

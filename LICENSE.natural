@@ -1,0 +1,37 @@
+Third-party notice: components derived from the `natural` npm package, version 8.1.1
+(https://github.com/NaturalNode/natural), published under the MIT licence reproduced below.
+
+- src/en/_porter.ts is a port of natural's lib/natural/stemmers/porter_stemmer.js
+  (Copyright (c) 2011, Chris Umbel).
+- models/natural/lexicon_from_posjs.json.gz and models/natural/tr_from_posjs.txt are natural's
+  lib/natural/brill_pos_tagger/data/English/lexicon_from_posjs.json (gzipped) and
+  tr_from_posjs.txt, unmodified. natural's README.txt for that directory records their origin:
+  the lexicon is from https://github.com/dariusk/pos-js and the rules are derived from that
+  project's BrillTransformationRules.js. pos-js states it is licensed under the GNU LGPLv3 and
+  is a JavaScript port (Percy Wegmann) of Mark Watson's FastTag tagger, itself based on Eric
+  Brill's trained rule set and English lexicon (Brill, "A simple rule-based part of speech
+  tagger", ANLC 1992).
+- src/en/_brill.ts is not derived from natural's tagger sources (which carry GPL-3.0 headers);
+  it is an independent implementation of the same behaviour, verified by differential testing.
+
+The MIT License (MIT)
+
+Copyright (c) 2011, 2012 Chris Umbel, Rob Ellis, Russell Mull
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.

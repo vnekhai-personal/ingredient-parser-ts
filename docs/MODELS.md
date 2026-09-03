@@ -18,6 +18,12 @@ possible_states/transitions=True; export quantize_bits=16, min_abs_weight=None.
 | `brill-porter.json.gz` | natural 8.1.1 Brill | natural 8.1.1 `PorterStemmer` | 94.60% | 97.90% | seed-42 / 0.2 fold: **the accuracy estimate** for the ship configuration; kept as fallback |
 | `brill-porter-full.json.gz` | natural 8.1.1 Brill | natural 8.1.1 `PorterStemmer` | (97.57%) | (99.22%) | **SHIP MODEL** — all 81,359 lines, no held-out split; bracketed numbers are train-set (leaked) scores, NOT an estimate |
 
+Component note (2026-09-03): since the `natural` dependency was vendored, the runtime's tagger and
+stemmer are in-repo reproductions of natural 8.1.1 (`src/en/_brill.ts` from the lexicon and rules
+under `models/natural/`; `src/en/_porter.ts`), kept identical to the package by
+`tests/harness/linguistics.test.ts` (every corpus and fixture token list, every FDC description,
+adversarial sets). No model changed; every entry above still describes the shipped components.
+
 ---
 
 ## 2026-09-02 — `models/brill-porter-full.json.gz` — full-data release retrain (SHIP)

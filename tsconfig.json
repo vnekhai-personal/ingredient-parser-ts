@@ -17,19 +17,7 @@
     "sourceMap": true,
     "outDir": "dist",
     "rootDir": "src",
-    "skipLibCheck": true,
-    "baseUrl": ".",
-    "paths": {
-      "natural": [
-        "./src/types/natural.d.ts"
-      ],
-      "natural/lib/natural/brill_pos_tagger/index.js": [
-        "./src/types/natural-brill.d.ts"
-      ],
-      "natural/lib/natural/stemmers/porter_stemmer.js": [
-        "./src/types/natural-porter.d.ts"
-      ]
-    }
+    "skipLibCheck": true
   },
   "include": [
     "src"

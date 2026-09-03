@@ -28,6 +28,7 @@ harness and the adversarial sets.
 | API | 107 fixture lines through `parse_multiple_ingredients` and `inspect_parser` | 0 mismatches |
 | Upstream tests | 45 files recreated verbatim, 458 cases | all active; 9 expected failures are documented tagger/model deltas (§6), verified in Python |
 | Snowball stemmer port | 13,839 vocabulary tokens vs NLTK | 0 mismatches |
+| Brill tagger + Porter stemmer (vendored, `_brill.ts` / `_porter.ts`) vs natural 8.1.1 live | every corpus + fixture token list (81,523), every FDC description (11,371), adversarial lists; every token, lowercased and hyphen-split | identical |
 | FDC caches | 11,362 precomputed entries vs runtime computation | identical |
 
 Option coverage: every combination of `separate_names`, `discard_isolated_stop_words`,
@@ -86,16 +87,19 @@ weakest labels). All 1,003 were read side by side: no new failure class.
 Hermes (React Native 0.81.5, bytecode v96), one bundle built from the head through esbuild,
 the React Native Babel preset and `hermesc`: 4,814 / 4,814 canonical serialisations
 byte-identical to Node across the 107 fixtures, 2,000 test-split lines and 300 fuzz lines,
-each with foundation foods off and on; 0 confidence-only differences. No Node API, no
-polyfill; `natural` is deep-imported and its data bundles as JSON.
+each with foundation foods off and on; 0 confidence-only differences. Re-run on the build with
+the vendored tagger and stemmer (PORTING.md §3.10): again 4,814 / 4,814 identical to Node, and
+identical to the previous build's output; the bytecode of that full bundle (parser, foundation
+foods, driver) went from 14.8 MB to 11.2 MB. No Node API, no polyfill, no runtime dependency.
 
 Costs (CPU time on an M-series laptop; wall time under load was higher): plain parse ~5–6 ms
 on Hermes, ~1.5 ms on Node; foundation-foods parse ~60 ms on Hermes, ~10 ms on Node;
 `preload_foundation_foods()` 1.2–3.1 s on Hermes (base64 decoding of ~10 MB of assets), 0.1 s
 on Node; first foundation-foods parse after preload 0.17–0.75 s. Peak RSS on Hermes 61–72 MB
-plain, 118–132 MB with foundation foods. Bundle: 1.09 MB gzipped parser-only, 5.9 MB gzipped
-with foundation-foods data; a tree-shaking bundler that never references the preload drops
-the 7.2 MB of foundation-foods modules, Metro does not.
+plain, 118–132 MB with foundation foods. Bundle from the main entry (esbuild, no minification):
+3.3 MB of JS, 0.87 MB gzipped — the CRF model 1.8 MB, the Brill lexicon 1.0 MB, code and tables
+0.4 MB (0.1.0 with `natural` bundled: 7.9 MB, 1.09 MB gzipped). The foundation-foods entry point
+adds its 8.6 MB of assets only to apps that import it.
 
 ## 6. Documented limits and deviations
 

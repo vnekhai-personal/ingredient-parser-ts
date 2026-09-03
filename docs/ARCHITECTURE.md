@@ -29,7 +29,10 @@ parity status. A module's status changes only with harness evidence (docs/VERIFI
 | `src/en/_constants.ts` | `en/_constants.py` | **generated** by `training/gen-constants.py` | level 2 |
 | `src/en/_htmlEntities.ts` | Python stdlib `html.entities.html5` + invalid charref tables | **generated** by `training/gen-constants.py` | level 2 |
 | `src/en/_regex.ts` | `en/_regex.py` | **Level 2 PASS** | 81,523 / 81,523 sentences |
-| `src/en/_utils.ts` | `en/_utils.py` (complete; `pos_tag`/`stem` are natural's) | **Level 3 PASS** | test_utils 27/27 |
+| `src/en/_utils.ts` | `en/_utils.py` (complete; `pos_tag`/`stem` delegate to `_brill.ts` / `_porter.ts`) | **Level 3 PASS** | test_utils 27/27 |
+| `src/en/_brill.ts` | natural 8.1.1 `BrillPOSTagger(Lexicon('EN','NN','NNP'), RuleSet('EN'))` — behaviour reimplemented; lexicon + rules vendored in `models/natural/` | supporting module (2026-09-03) | `tests/harness/linguistics.test.ts`: identical to natural over every corpus + fixture token list, every FDC description and adversarial lists; level 2 over the corpus |
+| `src/en/_porter.ts` | natural 8.1.1 `PorterStemmer.stem` (MIT), ported step for step | supporting module (2026-09-03) | same test: identical over the corpus vocabulary (+ lowercased, hyphen parts) and adversarial tokens |
+| `src/en/data/brill.en.ts` | `models/natural/lexicon_from_posjs.json.gz` + `tr_from_posjs.txt` (first category per word, grouped) | **generated** by `training/extract-brill.mjs` (`pnpm model`), gitignored, eager | — |
 | `src/en/_nltk_chunk.ts` | `nltk.chunk.regexp` subset (RegexpParser with chunk rules, ChunkString, Tree) | supporting module | level 2 + structure-feature tests |
 | `src/en/_structure_features.ts` | `en/_structure_features.py` | **Level 2 PASS** | 26 upstream tests: 23 pass, 3 tagger-delta (`it.fails`, see tests/upstream/README.md) |
 | `src/en/preprocess.ts` | `en/preprocess.py` | **Level 2 PASS** (2026-09-02) | features-test.jsonl 16,272 seqs / 117,369 tokens: 0 value, 0 key-order mismatches; feature-hashes.jsonl 81,523 lines (corpus + fixtures): 0 mismatches; 15 upstream test files green |
@@ -47,12 +50,13 @@ become one trailing options object with the same keys. Mapping table: `tests/ups
 
 ## Runtime shape
 
-- Pure ESM, strict TS. One runtime dependency: `natural` 8.1.1 (Brill tagger + Porter
-  stemmer — the exact components the ship model was trained with, CLAUDE.md I2). Its Brill
-  data is bundled JSON loaded via `require`, no filesystem. No Node APIs in `src/` (Hermes must
-  run it); `.json.gz` reading lives in `tests/helpers/loadModel.ts` only. How the model asset
-  ships is decided (uncompressed module, PORTING.md §3.9). `src/types/natural.d.ts` shadows natural's own
-  typings (they pull a `.ts` source into the type-check) via tsconfig `paths`.
+- Pure ESM, strict TS, no runtime dependency. The Brill tagger and Porter stemmer — the exact
+  components the ship model was trained with, CLAUDE.md I2 — are natural 8.1.1's, reproduced in
+  `_brill.ts` / `_porter.ts` with the lexicon and rules as a generated module (PORTING.md §3.10);
+  `natural` itself is a devDependency the differential test runs against (`tests/types/` holds its
+  minimal typings). No Node APIs in `src/` (Hermes must run it); `.json.gz` reading lives in
+  `tests/helpers/loadModel.ts` only. How the model asset ships is decided (uncompressed module,
+  PORTING.md §3.9).
 - `NumpyCRFInference` takes the parsed model JSON (`CRFModelJson`,
   shape from `train/export.py`) and exposes `tag_from_features(featureDicts)` →
   `[label, confidence][]` and `marginal(label, position)`.
@@ -101,7 +105,10 @@ become one trailing options object with the same keys. Mapping table: `tests/ups
   classifies confidence-only ±1e-6 differences separately from semantic ones.
 - `tests/harness/ffcache.test.ts` — the precomputed FDC caches vs the runtime computation
   (sample of rows + full rankers always; every row under `HARNESS=full`).
-- `tests/harness/snowball.test.ts`, `pyset.test.ts` — differential tests of the supporting modules.
+- `tests/harness/snowball.test.ts`, `pyset.test.ts` — differential tests of the supporting modules;
+  `linguistics.test.ts` — the vendored Brill tagger and Porter stemmer against natural 8.1.1 live
+  (5,000-line sample + fixtures + adversarial lists always; every line and every FDC description
+  under `HARNESS=full`) and against the committed Python-side tags.
 - `tests/harness/serialize.ts` + `output.test.ts` — level 3: `parse_ingredient` over `parsed.jsonl`
   (`training/dump-parsed.py`, ship model, corpus + fixtures) compared byte for byte against Python's
   canonical serialisation (Fraction → "Fraction(n, d)", Unit → "<Unit('x')>", floats in Python repr).

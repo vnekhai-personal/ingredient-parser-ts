@@ -6,7 +6,16 @@
     "types": [
       "node"
     ],
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "baseUrl": ".",
+    "paths": {
+      "natural/lib/natural/brill_pos_tagger/index.js": [
+        "./tests/types/natural-brill.d.ts"
+      ],
+      "natural/lib/natural/stemmers/porter_stemmer.js": [
+        "./tests/types/natural-porter.d.ts"
+      ]
+    }
   },
   "include": [
     "src",

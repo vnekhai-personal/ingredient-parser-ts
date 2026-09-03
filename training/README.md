@@ -14,6 +14,8 @@ proven runs, not a polished CLI.
                            silent fallback to NLTK); unset = stock upstream behavior
 - gen-constants.py         GENERATES src/en/_constants.ts + _htmlEntities.ts from upstream / stdlib
 - gen-pint.py              GENERATES src/en/_pintRegistry.ts from a fresh pint registry + pint_extensions.txt
+- extract-brill.mjs        models/natural/lexicon_from_posjs.json.gz + tr_from_posjs.txt → src/en/data/brill.en.ts (the
+                           vendored tagger data as a runtime asset: first category per word, grouped; `pnpm model`)
 - extract-model.mjs        models/brill-porter-full.json.gz → src/en/data/model.en.ts (runtime asset; `pnpm model`)
 - train-full.py            full-data release retrain (no split; upstream trainer/params/export at the pin);
                            BRILL_TAGS_FILE + PORTER_STEMS_FILE required → models/<name>.json.gz + config json
@@ -32,7 +34,7 @@ proven runs, not a polished CLI.
 - precompute-ff-caches.mjs GENERATES src/en/data/ffcache.en.ts (`pnpm model`, last step): the FDC-side ranker caches
                            (tokenized descriptions, uSIF vectors/norms/constants, BM25 idf) computed by the runtime
                            code itself (tsc scratch build under node_modules/.cache/); marker = sha256 over the gz
-                           inputs + the source import closure + natural's version, so any code change regenerates it.
+                           inputs + the source import closure + the vendored tagger data, so any code change regenerates it.
                            Identity with the runtime computation: tests/harness/ffcache.test.ts
 - compare-lines.sh         ad-hoc lines through Python AND the TS port, printed + diffed byte for byte
 - dump-feature-hashes.py   harness level 2 dump over the full corpus + fixtures (feature-hashes.jsonl);
@@ -51,7 +53,10 @@ entry point that uses process pools with `if __name__ == "__main__"` (macOS spaw
 
 Node deps live in `training/package.json` (`natural` pinned exactly — the tagger/stemmer at
 training must match inference). Install with `cd training && npm i`; `brill-tag.mjs`
-resolves `natural` from `training/node_modules` regardless of the cwd it is run from.
+resolves `natural` from `training/node_modules` regardless of the cwd it is run from. The
+runtime reproduces the same two components without the package (`src/en/_brill.ts`,
+`src/en/_porter.ts`, data from `models/natural/`); `tests/harness/linguistics.test.ts` keeps them
+identical to the root devDependency `natural` 8.1.1.
 
 Level-2 corpus dump recipe (maps must cover corpus AND fixture tokens; from the repo root):
 ```

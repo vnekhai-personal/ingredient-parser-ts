@@ -68,7 +68,7 @@ top-level directories without approval.
 - Never claim parity or accuracy without the harness level or evaluation numbers to show.
 - Never break the canonical JSON convention (compact separators, raw unicode) in any
   cross-language map or dump.
-- Never change the upstream pin, publish, add a runtime dependency beyond `natural`, or
+- Never change the upstream pin, publish, add a runtime dependency (there are none), or
   accept an accuracy regression beyond the recorded deltas without the maintainer's word.
 - Text the maintainer supplies verbatim ships character for character.
 - When the maintainer asks a question or describes a problem, the deliverable is the

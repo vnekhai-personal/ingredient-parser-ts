@@ -3,17 +3,15 @@
  * `convert_to_pint_unit`, `to_frac`, `ingredient_amount_factory`, `UREG`,
  * `VOLUMETRIC_UNITS_W_ALTERNATIVES`, `MISINTERPRETED_UNITS` land with step 3 (pint subset).
  *
- * Linguistic components (CLAUDE.md I2): the POS tagger is natural's Brill tagger and the
- * stemmer natural's vanilla PorterStemmer, exactly as `training/brill-tag.mjs` and
- * `training/porter-stem.mjs` produced the tags/stems `models/brill-porter.json.gz` was
- * trained on. NLTK's perceptron tagger + ingredient tagdict and Snowball stemmer are NOT
- * ported (docs/PORTING.md–2.4).
+ * Linguistic components (CLAUDE.md I2): the POS tagger is natural 8.1.1's Brill tagger and the
+ * stemmer natural 8.1.1's vanilla PorterStemmer, exactly as `training/brill-tag.mjs` and
+ * `training/porter-stem.mjs` produced the tags/stems the ship model was trained on — reproduced
+ * in `_brill.ts` (vendored lexicon + rules) and `_porter.ts` so the runtime has no dependency on
+ * the `natural` package (whose root requires database clients and Node-only modules). NLTK's
+ * perceptron tagger + ingredient tagdict and Snowball stemmer are NOT ported (docs/PORTING.md §3).
  */
-// Deep imports on purpose: `natural`'s root index requires storage backends (mongoose, redis,
-// pg, dotenv…) and Node built-ins, which breaks React Native/web bundles and runs dotenv on
-// import (docs/VERIFICATION.md D1). These two modules need nothing outside natural itself.
-import brill from 'natural/lib/natural/brill_pos_tagger/index.js';
-import PorterStemmer from 'natural/lib/natural/stemmers/porter_stemmer.js';
+import { brill_tag } from './_brill.js';
+import { porter_stem } from './_porter.js';
 import { PY_B, PY_EOS, PY_NS, PY_W, pyFindall, pyReplaceAll, pyRound, pyStrip, dictGet, pyReTemplate } from '../_py.js';
 import { is_float, is_range } from '../_common.js';
 import { IngredientAmount } from '../dataclasses.js';
@@ -67,12 +65,6 @@ export const UNIT_REPLACEMENTS: readonly (readonly [RegExp, string])[] = UNIT_RE
   ([unit, repl]) => [new RegExp(`${PY_B}(${unit})${PY_B}`, 'gu'), repl] as const,
 );
 
-// ---- tagger + stemmer (natural 8.1.1, pinned in package.json) ----
-const LEXICON = new brill.Lexicon('EN', 'NN', 'NNP');
-const RULE_SET = new brill.RuleSet('EN');
-const TAGGER = new brill.BrillPOSTagger(LEXICON, RULE_SET);
-const STEMMER = PorterStemmer;
-
 // Tokenizer regular expressions.
 /** One or more non-whitespace characters. */
 const WHITESPACE_TOKENISER = new RegExp(`${PY_NS}+`, 'gu');
@@ -93,9 +85,9 @@ export function tokenize(sentence: string): string[] {
   return second.flat().filter((tok) => tok !== '');
 }
 
-/** Tag tokens with parts of speech (natural's Brill tagger). Returns (token, tag) pairs. */
+/** Tag tokens with parts of speech (natural 8.1.1's Brill tagger, `_brill.ts`). Returns (token, tag) pairs. */
 export function pos_tag(tokens: readonly string[]): [string, string][] {
-  return TAGGER.tag([...tokens]).taggedWords.map((w) => [w.token, w.tag]);
+  return brill_tag(tokens);
 }
 
 /** Combine ["and", "/", "or"] into a single "and/or" token. */
@@ -121,11 +113,11 @@ export function combine_and_or(tokens: readonly string[]): string[] {
 
 const STEM_CACHE = new Map<string, string>();
 
-/** Stem a token (natural's PorterStemmer), cached. */
+/** Stem a token (natural 8.1.1's PorterStemmer, `_porter.ts`), cached. */
 export function stem(token: string): string {
   let s = STEM_CACHE.get(token);
   if (s === undefined) {
-    s = STEMMER.stem(token);
+    s = porter_stem(token);
     STEM_CACHE.set(token, s);
   }
   return s;
