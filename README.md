@@ -100,8 +100,6 @@ Ported, verified, in production use. Single maintainer, discretionary maintenanc
 
 ## License
 
-MIT. Upstream code, model and data are MIT © Tom Strange (`LICENSE.upstream`); this port keeps
-that attribution. The Porter stemmer port and the vendored Brill lexicon and rules derive from
-`natural` 8.1.1 (MIT); the lexicon's own origin is pos-js (LGPLv3) — `LICENSE.natural` and
-`models/natural/README.md` record the chain. The FDC descriptions derive from USDA FoodData
-Central (public domain).
+MIT. Upstream code, model and data: MIT © Tom Strange (`LICENSE.upstream`). Third-party
+notices for the tagger data and the stemmer: `LICENSE.natural`. FDC descriptions: USDA
+FoodData Central, public domain.

@@ -217,7 +217,7 @@ entries stay in the ledgers with what changed. If a reader cannot replay it, the
 The whole library is ported and verified (`docs/VERIFICATION.md`); the parity version is tagged
 `v2.7.0-parity`; the first corrections beyond upstream are in (`quirks: 'fixed'`, `tag_ingredient`);
 0.1.0 is published (npm `ingredient-parser-typescript`, GitHub release v0.1.0). Since then: the
-`natural` dependency is vendored (0.2.0, to publish).
+`natural` dependency is vendored (0.2.0 published); 0.2.1 = licence-notice wording.
 
 ### Measured facts (do not re-derive; update in the same change that changes them)
 | Fact | Value |

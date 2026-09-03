@@ -1,18 +1,11 @@
-Third-party notice: components derived from the `natural` npm package, version 8.1.1
-(https://github.com/NaturalNode/natural), published under the MIT licence reproduced below.
+Third-party notice
 
-- src/en/_porter.ts is a port of natural's lib/natural/stemmers/porter_stemmer.js
-  (Copyright (c) 2011, Chris Umbel).
-- models/natural/lexicon_from_posjs.json.gz and models/natural/tr_from_posjs.txt are natural's
-  lib/natural/brill_pos_tagger/data/English/lexicon_from_posjs.json (gzipped) and
-  tr_from_posjs.txt, unmodified. natural's README.txt for that directory records their origin:
-  the lexicon is from https://github.com/dariusk/pos-js and the rules are derived from that
-  project's BrillTransformationRules.js. pos-js states it is licensed under the GNU LGPLv3 and
-  is a JavaScript port (Percy Wegmann) of Mark Watson's FastTag tagger, itself based on Eric
-  Brill's trained rule set and English lexicon (Brill, "A simple rule-based part of speech
-  tagger", ANLC 1992).
-- src/en/_brill.ts is not derived from natural's tagger sources (which carry GPL-3.0 headers);
-  it is an independent implementation of the same behaviour, verified by differential testing.
+src/en/_porter.ts is a port of porter_stemmer.js from the `natural` npm package, version 8.1.1
+(https://github.com/NaturalNode/natural), MIT licence, reproduced below.
+
+The English Brill lexicon and transformation rules (models/natural/, generated into
+src/en/data/brill.en.ts) are natural's data files, unmodified, originally from pos-js
+(https://github.com/dariusk/pos-js), which states the GNU LGPLv3. Details: models/natural/README.md.
 
 The MIT License (MIT)
 
