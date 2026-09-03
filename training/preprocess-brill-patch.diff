@@ -1,0 +1,94 @@
+diff --git a/ingredient_parser/en/_utils.py b/ingredient_parser/en/_utils.py
+index f8167ab..a32b185 100644
+--- a/ingredient_parser/en/_utils.py
++++ b/ingredient_parser/en/_utils.py
+@@ -209,6 +209,21 @@ def pos_tag(tokens: list[str]) -> list[tuple[str, str]]:
+     list[tuple[str, str]]
+         List of (token, tag) pairs.
+     """
++    # SCRATCH EXPERIMENT (same hook as preprocess.py): BRILL_TAGS_FILE substitutes natural's
++    # Brill tags for NLTK's, keyed by the canonical JSON of the token list. Used here by the
++    # foundation-foods FDC description tokenizer. Misses raise.
++    import json as _json
++    import os as _os
++    global _BRILL_MAP_UTILS
++    if _os.environ.get("BRILL_TAGS_FILE") and "_BRILL_MAP_UTILS" not in globals():
++        _BRILL_MAP_UTILS = {}
++        with open(_os.environ["BRILL_TAGS_FILE"]) as _f:
++            for _line in _f:
++                _row = _json.loads(_line)
++                _BRILL_MAP_UTILS[_row["k"]] = _row["tags"]
++    if _os.environ.get("BRILL_TAGS_FILE"):
++        _tags = _BRILL_MAP_UTILS[_json.dumps(list(tokens), separators=(",", ":"), ensure_ascii=False)]
++        return list(zip(tokens, _tags, strict=True))
+     tagger = _get_tagger("eng")
+     ingredient_tagdict = load_ingredient_tagdict()
+     tagger.tagdict.update(ingredient_tagdict)
+diff --git a/ingredient_parser/en/preprocess.py b/ingredient_parser/en/preprocess.py
+index ddfc76e..20d700b 100644
+--- a/ingredient_parser/en/preprocess.py
++++ b/ingredient_parser/en/preprocess.py
+@@ -571,7 +571,38 @@ class PreProcessor:
+             List of Tokens for sentence.
+         """
+         tokens = []
+-        for i, (text, pos) in enumerate(pos_tag(tokenize(sentence))):
++        # SCRATCH EXPERIMENT: BRILL_TAGS_FILE points at a JSONL map of
++        # token-list-JSON -> Brill tags (natural's BrillPOSTagger, tagged in Node).
++        # When set, those tags replace NLTK's — the tagger must be the same at
++        # training and inference, so this trains the Brill-tag variant.
++        import json as _json
++        import os as _os
++        global _BRILL_MAP
++        if _os.environ.get("BRILL_TAGS_FILE") and "_BRILL_MAP" not in globals():
++            _BRILL_MAP = {}
++            with open(_os.environ["BRILL_TAGS_FILE"]) as _f:
++                for _line in _f:
++                    _row = _json.loads(_line)
++                    _BRILL_MAP[_row["k"]] = _row["tags"]
++        if _os.environ.get("BRILL_TAGS_FILE"):
++            _toks = tokenize(sentence)
++            _tags = _BRILL_MAP[_json.dumps(_toks, separators=(",", ":"), ensure_ascii=False)]
++            _tagged = list(zip(_toks, _tags, strict=True))
++        else:
++            _tagged = pos_tag(tokenize(sentence))
++        # SCRATCH EXPERIMENT: PORTER_STEMS_FILE points at a JSONL map of
++        # token -> natural PorterStemmer stem (vanilla Porter, stemmed in Node).
++        # When set, those stems replace NLTK Snowball's — the stemmer must be the
++        # same at training and inference, so this trains the portable-stem variant.
++        # A miss raises KeyError: nothing may silently fall back to the Python stemmer.
++        global _PORTER_STEMS
++        if _os.environ.get("PORTER_STEMS_FILE") and "_PORTER_STEMS" not in globals():
++            _PORTER_STEMS = {}
++            with open(_os.environ["PORTER_STEMS_FILE"]) as _f:
++                for _line in _f:
++                    _row = _json.loads(_line)
++                    _PORTER_STEMS[_row["w"]] = _row["s"]
++        for i, (text, pos) in enumerate(_tagged):
+             # Convert tokens:
+             # * Singularise units, keeping track of indices of singularised tokens
+             # * Replace numeric token with "!num"
+@@ -607,7 +638,9 @@ class PreProcessor:
+                 pos = "NN"
+ 
+             features = TokenFeatures(
+-                stem=stem(feat_text),
++                stem=_PORTER_STEMS[feat_text]
++                if _os.environ.get("PORTER_STEMS_FILE")
++                else stem(feat_text),
+                 shape=self._word_shape(feat_text),
+                 is_capitalised=self._is_capitalised(feat_text),
+                 is_unit=self._is_unit(feat_text),
+@@ -1180,6 +1213,12 @@ class PreProcessor:
+             features |= self._common_features(index + 3, "next3_")
+             features |= self.sentence_structure.token_features(index + 3, "next3_")
+ 
++        # SCRATCH ABLATION: NO_POS_FEATURES=1 strips every POS-derived feature so the
++        # retrain measures how much the NLTK tagger actually contributes.
++        import os
++        if os.environ.get("NO_POS_FEATURES"):
++            features = {k: v for k, v in features.items() if "pos" not in k}
++
+         return features
+ 
+     def sentence_features(self) -> list[FeatureDict]:

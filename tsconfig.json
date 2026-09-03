@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": [
+      "ES2022"
+    ],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "declaration": true,
+    "sourceMap": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "natural": [
+        "./src/types/natural.d.ts"
+      ],
+      "natural/lib/natural/brill_pos_tagger/index.js": [
+        "./src/types/natural-brill.d.ts"
+      ],
+      "natural/lib/natural/stemmers/porter_stemmer.js": [
+        "./src/types/natural-porter.d.ts"
+      ]
+    }
+  },
+  "include": [
+    "src"
+  ]
+}

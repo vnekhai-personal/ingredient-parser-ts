@@ -1,0 +1,46 @@
+{
+  "name": "ingredient-parser-ts",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Bit-parity TypeScript port of strangetom/ingredient-parser (pinned at ffd6ae3, release 2.7.0)",
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./en": "./dist/en/index.js",
+    "./en/*": "./dist/en/*.js",
+    "./en/foundationfoods": "./dist/en/foundationfoods/index.js",
+    "./en/foundationfoods/*": "./dist/en/foundationfoods/*.js",
+    "./dataclasses": "./dist/dataclasses.js",
+    "./fraction": "./dist/fraction.js",
+    "./pint": "./dist/_pint.js",
+    "./inference": "./dist/inference.js",
+    "./parsers": "./dist/parsers.js"
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "LICENSE",
+    "LICENSE.upstream"
+  ],
+  "scripts": {
+    "model": "node training/extract-model.mjs && node training/extract-ff-assets.mjs && node training/precompute-ff-caches.mjs",
+    "build": "pnpm model && rm -rf dist && tsc -p tsconfig.build.json",
+    "typecheck": "pnpm model && tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json",
+    "test": "pnpm model && vitest run",
+    "harness": "pnpm model && HARNESS=full vitest run tests/harness",
+    "prepack": "pnpm build"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.2.0"
+  },
+  "dependencies": {
+    "natural": "8.1.1"
+  }
+}
