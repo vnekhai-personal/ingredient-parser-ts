@@ -545,7 +545,7 @@ def pint_result(fn):
         return {"k": "raise", "v": type(e).__name__, "m": str(e)[:80]}
 
 
-# Hand-picked unit strings: every case from docs/VERIFICATION.md/D8, pint's word forms, pretty
+# Hand-picked unit strings: every unit-string case from docs/VERIFICATION.md §7 (pint front end), pint's word forms, pretty
 # exponents, stray punctuation, Python-tokenizer edge cases (strings, f-strings, numbers, brackets,
 # newlines/indentation, coding cookies), and the registry preprocessors.
 PINT_EDGE = [

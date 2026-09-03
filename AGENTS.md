@@ -18,8 +18,9 @@ top-level directories without approval.
   generated from the pin, never written by hand.
 - `tests/` — vitest: `upstream/` (upstream's pytest suite recreated verbatim), `harness/`
   (the differential levels), `goldens/` (generated samples and the committed Python
-  references), `eval/` (opt-in primitive goldens).
-- `docs/` — `PORTING.md`, `VERIFICATION.md`, `ARCHITECTURE.md`, `MODELS.md`.
+  references), `quirks/` (both-modes tests for every correction), `eval/` (opt-in
+  primitive goldens).
+- `docs/` — `PORTING.md`, `VERIFICATION.md`, `QUIRKS.md`, `ARCHITECTURE.md`, `MODELS.md`.
 - `notes/` — gitignored private working material (`notes/README.md`); never referenced from
   public docs.
 - Root — `CLAUDE.md`, `AGENTS.md`, `CONTRIBUTING.md`, `README.md`, `LICENSE*`, configs only.
@@ -27,7 +28,7 @@ top-level directories without approval.
 ## Session start
 
 1. Read `CLAUDE.md` (constraints, invariants, measured facts).
-2. Read `docs/PORTING.md` (decisions, parity discipline).
+2. Read `docs/PORTING.md` (decisions, parity discipline) and `docs/QUIRKS.md`.
 3. `git log --oneline -15` — what happened since the docs were written.
 4. `pnpm typecheck && pnpm test` before changing anything.
 
@@ -41,7 +42,7 @@ top-level directories without approval.
 
 ## File responsibilities
 
-- `docs/PORTING.md` §3 (settled decisions) and §8 — the maintainer's.
+- `docs/PORTING.md` §3 (settled decisions) and `docs/QUIRKS.md` — the maintainer's.
   Reopening a decision needs the maintainer's word and new evidence, recorded in the same
   change; a correction needs a test asserting both modes.
 - `models/` — the training pipeline's. Never hand-edit a model; a new experiment is a new
@@ -58,8 +59,8 @@ top-level directories without approval.
 ## Rules
 
 - The default output is byte-parity with Python at the pin; a change that alters it
-  silently is an incident. Corrections go behind an explicit option with a public entry and a
-  both-modes test. Nothing is contributed upstream.
+  silently is an incident. Corrections go behind `quirks: 'fixed'` with a `docs/QUIRKS.md`
+  entry and a both-modes test. Nothing is contributed upstream.
 - Never mix taggers or stemmers across the training/inference boundary; any
   linguistic-component change means a retrain and a recorded evaluation.
 - Never mutate a shipped or measured model artifact; never hand-edit goldens or the committed

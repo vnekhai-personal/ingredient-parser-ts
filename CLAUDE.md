@@ -7,7 +7,7 @@
 a CRF sequence labeller that parses English recipe ingredient sentences ("2 tbsp olive oil,
 divided") into structured `ParsedIngredient` data (name, amounts, size, preparation, comment,
 purpose, foundation foods). Read `docs/PORTING.md` before any work: decisions, parity
-discipline.
+discipline; `docs/QUIRKS.md` for the corrections beyond upstream.
 
 - **Why TS:** the runtime has zero native dependencies — quantized CRF weights in JSON and a
   Viterbi loop — so it runs everywhere JS runs, including React Native/Hermes, for as-you-type,
@@ -32,8 +32,8 @@ ingredient-parser-ts/
 ├── training/             # Python-side retrain + dump + eval pipeline; training/data/ = vendored corpus
 ├── fixtures/             # probe-recipes.json — 107 real lines / 10 recipes, trap-annotated
 ├── tests/                # vitest: upstream/ (pytest recreated verbatim), harness/, goldens/ (samples +
-│                         # committed Python references under goldens/parity/), eval/, helpers/
-├── docs/                 # PORTING.md, VERIFICATION.md, ARCHITECTURE.md, MODELS.md
+│                         # committed Python references under goldens/parity/), quirks/, eval/, helpers/
+├── docs/                 # PORTING.md, VERIFICATION.md, QUIRKS.md, ARCHITECTURE.md, MODELS.md
 ├── notes/                # gitignored, private: detailed ledger, full parity-decision prose, audit reports,
 │                         # one-off scripts (notes/README.md) — never published, never referenced from public docs
 └── (root)                # CLAUDE.md, AGENTS.md, CONTRIBUTING.md, README.md, LICENSE*, configs only
@@ -64,6 +64,7 @@ Read existing code before making changes. Understand the pattern. Reuse before i
 ### Proceed without asking when
 - The change is internal TS structure, harness implementation, or test organisation
 - A retrain or experiment follows the recorded pipeline and its result will be recorded
+- A `quirks: 'fixed'` correction is being implemented as specified (both-modes test included)
 
 ### Pause and ask when
 - A settled decision (`docs/PORTING.md` §3) looks wrong — bring evidence, don't relitigate silently
@@ -94,8 +95,8 @@ convention, relevant file paths, and what harness level must pass after.
 - **Parity by default, corrections by option.** Up to `v2.7.0-parity` upstream bugs are ported
   faithfully and documented. From there the port evolves independently: nothing goes upstream
   as a PR; upstream is tracked and its changes adopted deliberately; corrections and API
-  additions are allowed behind an explicit option, each recorded publicly and in
-  `notes/ledger.md` with a test asserting both modes, and the default output stays byte-parity
+  additions are allowed, each recorded in `docs/QUIRKS.md` (public) and `notes/ledger.md`
+  (private detail) with a test asserting both modes, and the default output stays byte-parity
   so every number in these docs remains true. A change that silently alters the default output
   is an incident.
 - **Module mapping is 1:1 with upstream:** `inference.py`, `en/preprocess.py` (+ `_constants`,
@@ -146,7 +147,9 @@ Violating any invariant is an incident, not a judgment call.
 - **Naming: upstream identifiers verbatim.** Functions, methods, attributes, dataclass fields,
   constants and private `_names` keep upstream's exact snake_case spelling; source files keep
   upstream's stems. Keyword arguments become one trailing options object with the same keys.
-  Only additions beyond upstream (`Fraction`, `Unit`, `logaddexp`) are free. Mapping: `tests/upstream/README.md`.
+  Only additions beyond upstream (`Fraction`, `Unit`, `logaddexp`, `tag_ingredient`, `quirks`)
+  are free. Mapping: `tests/upstream/README.md`.
+- **Corrections are marked** `QUIRK fix <name>` in the code and gated on `quirks === 'fixed'`.
 - **Keep it simple.** No premature abstraction. But never trade reliability for simplicity.
 
 ## 6. DOCUMENTATION
@@ -159,6 +162,8 @@ A change is not complete until its docs are updated.
 - `AGENTS.md` — coordination rules, file responsibilities, session protocol.
 - `docs/PORTING.md` — what was ported and why, settled decisions with evidence, parity
   discipline, training pipeline, publishing.
+- `docs/QUIRKS.md` — the `quirks: 'fixed'` corrections and additions beyond upstream (public);
+  `notes/ledger.md` holds the detailed, private record.
 - `docs/VERIFICATION.md` — harness results, seams and their bounds, documented limits.
 - `docs/ARCHITECTURE.md` — module ↔ upstream file map with parity status and per-module decisions.
 - `docs/MODELS.md` — model provenance ledger (append-only).
@@ -170,7 +175,7 @@ A change is not complete until its docs are updated.
 | Training pipeline / a retrain runs | `docs/MODELS.md` entry + `docs/PORTING.md` §6 |
 | `src/**` | `docs/ARCHITECTURE.md` (module ↔ upstream file, parity status) |
 | Harness levels, a new seam or limit | `docs/PORTING.md` §4 checklist + `docs/VERIFICATION.md` |
-| A correction or API addition | its public entry + `notes/ledger.md` + a both-modes test |
+| A correction or API addition | `docs/QUIRKS.md` + `notes/ledger.md` + `tests/quirks/` |
 | `fixtures/probe-recipes.json` | the entry's `style` annotation; regenerate references |
 | `training/*` scripts | `training/README.md` |
 | Upstream pin | `docs/PORTING.md` §2 + README + full harness re-run recorded |
@@ -204,8 +209,8 @@ entries stay in the ledgers with what changed. If a reader cannot replay it, the
 
 ### State
 The whole library is ported and verified (`docs/VERIFICATION.md`); the parity version is tagged
-`v2.7.0-parity` (this commit). Next: corrections beyond upstream behind an option, then
-packaging and publishing (`docs/PORTING.md` §9).
+`v2.7.0-parity`; the first corrections beyond upstream are in (`quirks: 'fixed'`, `tag_ingredient`).
+Next: packaging and publishing (`docs/PORTING.md` §9 — registry and scope to record).
 
 ### Measured facts (do not re-derive; update in the same change that changes them)
 | Fact | Value |
@@ -235,3 +240,4 @@ packaging and publishing (`docs/PORTING.md` §9).
   corpus) → output (`ParsedIngredient` diff + upstream tests).
 - **Goldens / references** — expected outputs generated from the pin, never hand-written; the
   Python side of the harness is committed under `tests/goldens/parity/`.
+- **Quirks** — `'upstream'` (default, parity) or `'fixed'` (the corrections in `docs/QUIRKS.md`).

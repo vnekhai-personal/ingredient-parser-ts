@@ -6,7 +6,7 @@ import { formatStats, runLevel1 } from './level1.js';
 
 const ROOT = resolve(import.meta.dirname, '../..');
 // Confidences feed `round(x, 6)` upstream; anything far below 5e-7 cannot flip a rounded value
-// except at an exact rounding boundary. The measured value is recorded in docs/PORTING.md §4.
+// except at an exact rounding boundary. The measured value is recorded in docs/VERIFICATION.md §3.
 const SCORE_TOLERANCE = 1e-9;
 
 function check(statsText: string, stats: Awaited<ReturnType<typeof runLevel1>>) {

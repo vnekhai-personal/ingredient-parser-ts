@@ -30,7 +30,7 @@ export function load_parser_model(): NumpyCRFInference {
 // `foundation_foods: true`; the sync loaders below then behave like upstream's cached ones.
 // Consumers that never do so pay nothing (docs/PORTING.md step 4).
 //
-// The third lazy module, `data/ffcache.en.ts` (training/precompute-ff-caches.mjs, docs/PORTING.md), carries the FDC-side caches the rankers would otherwise build on the first match:
+// The third lazy module, `data/ffcache.en.ts` (training/precompute-ff-caches.mjs, docs/PORTING.md §3.7), carries the FDC-side caches the rankers would otherwise build on the first match:
 // the tokenized FDC descriptions, the uSIF sentence vectors + norms and constants, and the
 // BM25 idf table — computed at build time by THIS runtime code and verified identical to a
 // runtime computation (tests/harness/ffcache.test.ts). When it is absent (`FFCACHE = null`,

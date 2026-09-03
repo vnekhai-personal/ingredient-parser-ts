@@ -1,4 +1,4 @@
-"""Harness level 3 dump (docs/PORTING.md §4): parse_ingredient() over every corpus sentence and
+"""Harness level 3 dump (docs/PORTING.md): parse_ingredient() over every corpus sentence and
 every probe-fixture line with the SHIP MODEL, serialised canonically. The TS port must
 reproduce every line byte for byte.
 

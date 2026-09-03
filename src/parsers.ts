@@ -1,7 +1,9 @@
 /** Port of `ingredient_parser/parsers.py` (pin ffd6ae3). Identifiers verbatim. */
 import { SUPPORTED_LANGUAGES } from './_common.js';
 import type { ParsedIngredient, ParserDebugInfo } from './dataclasses.js';
-import { inspect_parser_en, parse_ingredient_en } from './en/parser.js';
+import { inspect_parser_en, parse_ingredient_en, tag_ingredient_en } from './en/parser.js';
+import type { TaggedIngredient } from './en/parser.js';
+import type { Quirks } from './en/postprocess.js';
 
 export const SUPPORTED_VOLUMEETRIC_UNITS_SYSTEMS: ReadonlySet<string> = new Set([
   'us_customary',
@@ -22,6 +24,8 @@ export interface ParseIngredientOptions {
   volumetric_units_system?: string;
   foundation_foods?: boolean;
   custom_units?: Readonly<Record<string, string>> | null;
+  /** Beyond upstream: 'upstream' (default, byte-parity with Python at the pin) or 'fixed' (docs/PORTING.md). */
+  quirks?: Quirks;
 }
 
 function validate(
@@ -56,6 +60,7 @@ function enOptions(options: ParseIngredientOptions, volumetric_units_system: str
     volumetric_units_system,
     foundation_foods: options.foundation_foods ?? false,
     custom_units: options.custom_units ?? null,
+    quirks: options.quirks ?? 'upstream',
   };
 }
 
@@ -72,7 +77,10 @@ export function parse_ingredient(sentence: string, options: ParseIngredientOptio
 
 /** Parse several sentences. Note upstream's default `volumetric_units_system="us"` here, mirrored. */
 export function parse_multiple_ingredients(sentences: Iterable<string>, options: ParseIngredientOptions = {}): ParsedIngredient[] {
-  return [...sentences].map((sentence) => parse_ingredient(sentence, { ...options, volumetric_units_system: options.volumetric_units_system ?? 'us' }));
+  // Upstream's default is "us", which its own validation rejects (documented quirk). QUIRK fix
+  // `multiple_ingredients_default` (docs/PORTING.md): in 'fixed' mode the default is the valid one.
+  const fallback = options.quirks === 'fixed' ? 'us_customary' : 'us';
+  return [...sentences].map((sentence) => parse_ingredient(sentence, { ...options, volumetric_units_system: options.volumetric_units_system ?? fallback }));
 }
 
 /** Return the intermediate objects generated during parsing. */
@@ -88,5 +96,19 @@ export function inspect_parser(sentence: string, options: ParseIngredientOptions
       return inspect_parser_en(sentence, enOptions(options, volumetric_units_system));
     default:
       throw new Error(`Unrecognised value "${lang}"`); // Python: ValueError
+  }
+}
+
+/**
+ * Addition beyond upstream: the model's labels and scores for `sentence` without the postprocessor.
+ * Same options as `parse_ingredient` (volumetric system and foundation foods are irrelevant here).
+ */
+export function tag_ingredient(sentence: string, options: ParseIngredientOptions = {}): TaggedIngredient {
+  const { lang } = validate(options, 'us_customary');
+  switch (lang) {
+    case 'en':
+      return tag_ingredient_en(sentence, enOptions(options, 'us_customary'));
+    default:
+      throw new Error(`Unrecognised value "${lang}"`);
   }
 }

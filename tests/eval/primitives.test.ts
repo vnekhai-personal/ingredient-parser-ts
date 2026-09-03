@@ -113,7 +113,7 @@ class Diff {
 
 // ---- 1. float(s) ------------------------------------------------------------------------------
 
-// Deep-evaluation evidence: known divergences (see docs/VERIFICATION.md). Run with EVAL=1; skipped by default.
+// Primitive goldens vs CPython/numpy/pint; known Unicode-version divergences (docs/VERIFICATION.md §6). Run with EVAL=1; skipped by default.
 const EVAL = process.env['EVAL'] === '1';
 const describeEval = EVAL ? describe : describe.skip;
 

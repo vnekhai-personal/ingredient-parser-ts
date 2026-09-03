@@ -12,7 +12,7 @@
  *   float64 with numpy's `logaddexp` formula folded left-to-right, and in the backward pass the
  *   `transitions + next_emissions` sum is a float32 add before the float64 beta is added.
  * - The only platform seam left is libm: `Math.exp`/`Math.log1p` may differ from macOS libm by
- *   an ulp. The harness measures this; see docs/PORTING.md §4.
+ *   an ulp. The harness measures this; see docs/PORTING.md
  * - Upstream gates the I_NAME_TOK constraint on `if constrain_transitions and b_name_idx:` —
  *   Python truthiness of the index. Mirrored literally (`bNameIdx` of 0 disables it too).
  * - Only quantized integer weights are supported. Upstream's float32 path sums emission rows in

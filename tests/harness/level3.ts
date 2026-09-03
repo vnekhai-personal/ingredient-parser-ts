@@ -1,4 +1,4 @@
-// Harness level 3 runner (docs/PORTING.md §4): parse_ingredient over a training/dump-parsed.py dump,
+// Harness level 3 runner (docs/PORTING.md): parse_ingredient over a training/dump-parsed.py dump,
 // diffed byte for byte against Python's canonical serialisation.
 import { openDump } from './dumps.js';
 import { createInterface } from 'node:readline';

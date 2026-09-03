@@ -1,5 +1,5 @@
 // Precompute the FDC-side caches the foundation-foods rankers would otherwise build on the
-// first match (docs/PORTING.md §3.7: ~6.4 s on Hermes) into the lazy asset:
+// first match (docs/PORTING.md: ~6.4 s on Hermes) into the lazy asset:
 //   src/en/data/glove.en.ts + fdc.en.ts + the runtime code  ->  src/en/data/ffcache.en.ts
 // Runs as the last step of `pnpm model`, AFTER extract-model.mjs and extract-ff-assets.mjs.
 //

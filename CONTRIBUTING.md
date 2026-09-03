@@ -18,8 +18,8 @@ project's MIT licence. Authorship of the project remains with the maintainer.
 - The default output must stay byte-identical to the Python reference at the pin
   (`docs/PORTING.md` §2). `pnpm typecheck && pnpm test` must pass, and any change that can
   touch parsing output must pass `HARNESS=full pnpm harness`.
-- A behavioural correction goes behind an explicit option with a documented entry and a test
-  asserting both modes. It does not change the default.
+- A behavioural correction goes behind `quirks: 'fixed'` with an entry in `docs/QUIRKS.md`
+  and a test asserting both modes (`tests/quirks/`). It does not change the default.
 - Upstream identifiers stay verbatim; keyword arguments become one trailing options object
   (`tests/upstream/README.md`).
 - Model files are write-once; a new model is a new file with a `docs/MODELS.md` entry made

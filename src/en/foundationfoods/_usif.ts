@@ -63,7 +63,7 @@ export class uSIF {
   fdc_vectors: Embedding[];
 
   /**
-   * With `cache` (the precomputed asset, docs/PORTING.md §3.7) the four derived members are loaded
+   * With `cache` (the precomputed asset, docs/PORTING.md) the four derived members are loaded
    * instead of computed; they are what this same code computed at build time
    * (training/precompute-ff-caches.mjs), verified identical by tests/harness/ffcache.test.ts.
    */

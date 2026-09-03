@@ -80,7 +80,8 @@ become one trailing options object with the same keys. Mapping table: `tests/ups
   context, pint's string preprocessor, tokenizer acceptance and expression-tree checks, `str`
   sorted / `repr` in insertion order). Upstream's postprocessor quirks — negative indexing,
   position-vs-index confusions, bounds checks against the wrong list, the `"SQAURE"` key — are
-  mirrored and marked `Upstream quirk` in the code.
+  mirrored and marked `Upstream quirk` in the code; corrections live behind `quirks: 'fixed'`
+  (`docs/QUIRKS.md`).
 - **Foundation foods** — Snowball stems for the matcher (its tables are Snowball stems), Porter
   for CRF features; Brill tags for FDC descriptions on both sides; assets lazy behind
   `preload_foundation_foods()`; FDC-side caches precomputed by the runtime's own code and
@@ -111,5 +112,16 @@ become one trailing options object with the same keys. Mapping table: `tests/ups
   Conventions, identifier mapping and the expected-failure policy: `tests/upstream/README.md`.
 - `tests/harness/dumps.ts` — resolves each Python reference: the regenerable root file if present,
   else the committed `tests/goldens/parity/<name>.jsonl.gz`.
+- `tests/quirks/quirks.test.ts` — every `quirks: 'fixed'` correction asserted in both modes.
 - `pnpm test` = vitest; `HARNESS=full pnpm harness` = every level; `EVAL=1` adds the primitive
   goldens; `pnpm typecheck` covers `src/` and the tests.
+
+## Beyond upstream (PORTING.md §8, QUIRKS.md)
+
+Everything above is the parity port. Added without touching the default path:
+- `quirks: 'upstream' | 'fixed'` on every parse entry point (`parsers.ts` → `en/parser.ts` →
+  `PostProcessor`). `'upstream'` (default) is the harness contract; `'fixed'` gates the corrections,
+  each marked `QUIRK fix <name>` in the code and tested in both modes in `tests/quirks/quirks.test.ts`.
+- `tag_ingredient()` (`parsers.ts`, `en/parser.ts: tag_ingredient_en`): the first half of
+  `parse_ingredient_en` — PreProcessor, model, `expect_name_in_output` fallback — returning tokens,
+  POS tags, labels and scores; no postprocessor, so none of its mirrored raises.

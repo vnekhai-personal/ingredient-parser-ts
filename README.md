@@ -34,6 +34,20 @@ await preload_foundation_foods();
 parse_ingredient('1 large red onion', { foundation_foods: true }).foundation_foods[0].fdc_id; // 790577
 ```
 
+Two additions beyond the upstream API:
+
+```ts
+// Upstream's postprocessing quirks, corrected. The default reproduces Python exactly;
+// 'fixed' applies the documented corrections (docs/QUIRKS.md).
+parse_ingredient('1 teaspoon (tsp) salt', { quirks: 'fixed' }).amount[0].unit; // teaspoon (upstream: teaspoon ** 2)
+parse_ingredient('1 cup flat-leaf parsley', { quirks: 'fixed' }).name[0].text;  // 'flat-leaf parsley' (upstream: 'flat-leaves parsley')
+
+// The model's labels without the postprocessor, for callers that build their own structure.
+import { tag_ingredient } from 'ingredient-parser-ts';
+tag_ingredient('2 tbsp chopped flat-leaf parsley');
+// { tokens: ['2','tbsp','chopped','flat-leaf','parsley'], labels: ['QTY','UNIT','PREP','B_NAME_TOK','I_NAME_TOK'], scores, pos_tags, sentence }
+```
+
 `parse_multiple_ingredients` and `inspect_parser` are exported as upstream defines them.
 
 ## Fidelity
@@ -47,9 +61,9 @@ it selects the same FDC entries; the match confidence can differ in its last dig
 every comparison is committed and the whole harness replays without Python. Details, numbers
 and the documented limits: [docs/VERIFICATION.md](docs/VERIFICATION.md).
 
-This commit is the parity version, tagged `v2.7.0-parity`. From here the port evolves on its
-own terms: upstream is tracked and its changes adopted deliberately; corrections of upstream
-behaviour will ship behind an explicit option so the default stays byte-parity.
+The parity version is the git tag `v2.7.0-parity`. From there the port evolves on its own
+terms: upstream is tracked and its changes adopted deliberately, while corrections ship behind
+`quirks: 'fixed'` with before/after tests ([docs/QUIRKS.md](docs/QUIRKS.md)).
 
 ## Model
 
@@ -65,11 +79,11 @@ every artifact: [docs/MODELS.md](docs/MODELS.md).
 ```
 src/                    runtime, one module per upstream file (docs/ARCHITECTURE.md)
 tests/                  vitest: upstream's suite recreated verbatim, the differential harness,
-                        committed Python references, opt-in primitive goldens
+                        committed Python references, quirks tests, opt-in primitive goldens
 models/                 write-once model artifacts and vendored upstream data
 training/               retrain, dump and evaluation pipeline; vendored training corpus
 fixtures/               107 annotated real ingredient lines
-docs/                   PORTING.md · VERIFICATION.md · ARCHITECTURE.md · MODELS.md
+docs/                   PORTING.md · VERIFICATION.md · QUIRKS.md · ARCHITECTURE.md · MODELS.md
 ```
 
 ```

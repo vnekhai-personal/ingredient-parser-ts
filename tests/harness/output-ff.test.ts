@@ -14,7 +14,7 @@ const ROOT = resolve(import.meta.dirname, '../..');
 const DUMP = resolveDump('parsed-ff.jsonl', 'PARSED_FF_DUMP');
 /** Semantic mismatches (which FDC entry, name_index, text) must be zero. */
 const MAX_SEMANTIC_RATE = Number(process.env['FF_MAX_MISMATCH_RATE'] ?? '0');
-/** Confidence-only deviations: measured max 9.3e-5 over the corpus (docs/PORTING.md §4); bound with headroom. */
+/** Confidence-only deviations: measured max 9.3e-5 over the corpus (docs/PORTING.md); bound with headroom. */
 const MAX_CONF_DIFF = 1e-3;
 
 describe('harness level 3 — foundation_foods=True over the full corpus + fixtures (parsed-ff.jsonl)', () => {

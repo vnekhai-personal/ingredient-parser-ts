@@ -30,7 +30,7 @@ export class BM25 {
   corpus: readonly FDCIngredient[];
 
   /**
-   * With `cache` (the precomputed asset, docs/PORTING.md §3.7) `avgdl` and `idf` are loaded instead of
+   * With `cache` (the precomputed asset, docs/PORTING.md) `avgdl` and `idf` are loaded instead of
    * computed. `t2d` / `doc_len` are still built here: filling them from a serialised form costs
    * the same Map insertions as building them from the (cached) tokens, so they are not stored.
    */

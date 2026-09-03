@@ -7,11 +7,11 @@
  * stemmer natural's vanilla PorterStemmer, exactly as `training/brill-tag.mjs` and
  * `training/porter-stem.mjs` produced the tags/stems `models/brill-porter.json.gz` was
  * trained on. NLTK's perceptron tagger + ingredient tagdict and Snowball stemmer are NOT
- * ported (docs/PORTING.md §3.2–3.3).
+ * ported (docs/PORTING.md–2.4).
  */
 // Deep imports on purpose: `natural`'s root index requires storage backends (mongoose, redis,
 // pg, dotenv…) and Node built-ins, which breaks React Native/web bundles and runs dotenv on
-// import (docs/VERIFICATION.md). These two modules need nothing outside natural itself.
+// import (docs/VERIFICATION.md D1). These two modules need nothing outside natural itself.
 import brill from 'natural/lib/natural/brill_pos_tagger/index.js';
 import PorterStemmer from 'natural/lib/natural/stemmers/porter_stemmer.js';
 import { PY_B, PY_EOS, PY_NS, PY_W, pyFindall, pyReplaceAll, pyRound, pyStrip, dictGet, pyReTemplate } from '../_py.js';
@@ -133,7 +133,7 @@ export function stem(token: string): string {
 
 // Compiled `\b(singular)\b` patterns per distinct merged units table. Upstream recompiles them
 // on every call; V8 caches compiled regexes by source but Hermes does not (≈0.7 ms per compile
-// × 222 units × 4–6 calls per parse ≈ 460 ms/parse — docs/VERIFICATION.md). Entry order follows
+// × 222 units × 4–6 calls per parse ≈ 460 ms/parse — docs/VERIFICATION.md D9). Entry order follows
 // Python's `UNITS | custom_units`: UNITS keys first (a custom value overrides in place), then the
 // custom keys not in UNITS in their own order. JS objects enumerate integer-like keys ("2", "10")
 // before insertion order, so a custom_units OBJECT with such keys cannot reproduce Python's order

@@ -27,7 +27,7 @@ describe("Test_expect_name_in_output", () => {
   });
 
   // @pytest.mark.model_dependent
-  // PARITY-DELTA (model, docs/PORTING.md §3.2–3.3): the stock model labels "2 tablespoons olive oil"
+  // PARITY-DELTA (model, docs/PORTING.md §3.2–2.4): the stock model labels "2 tablespoons olive oil"
   // COMMENT so no name exists; the ship model labels QTY UNIT B_NAME_TOK I_NAME_TOK and
   // Python with it returns name ["olive oil"], as the port does (verified 2026-09-02 with
   // models/brill-porter.json.gz and again with models/brill-porter-full.json.gz via

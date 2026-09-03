@@ -85,7 +85,7 @@ describe("TestPostProcessor_match_foundation_foods", () => {
     }
   });
 
-  // PARITY-DELTA (tagger+model, docs/PORTING.md §3.2–3.3) for "2 cooked red or green peppers": natural's
+  // PARITY-DELTA (tagger+model, docs/PORTING.md §3.2–2.4) for "2 cooked red or green peppers": natural's
   // Brill tags "cooked" VBN and the ship model labels it PREP, so the names are "red peppers" /
   // "green peppers" and the raw-food bias fires (2258590 / 2258588). Python at the pin with the
   // ship model + BRILL_TAGS_FILE returns exactly that, byte for byte (2026-09-02). The other

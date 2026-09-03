@@ -3,7 +3,7 @@
 How this repository relates to [strangetom/ingredient-parser](https://github.com/strangetom/ingredient-parser),
 what was decided and why, and how parity is defined and measured. Results and limits are in
 [VERIFICATION.md](VERIFICATION.md); module-level design in [ARCHITECTURE.md](ARCHITECTURE.md);
-model provenance in [MODELS.md](MODELS.md).
+model provenance in [MODELS.md](MODELS.md); corrections beyond upstream in [QUIRKS.md](QUIRKS.md).
 
 ## 1. What this is
 
@@ -34,7 +34,7 @@ adopted deliberately; nothing is contributed back.
 
 1. **Output contract = upstream `ParsedIngredient`, bit-parity by default.** Upstream's
    test suite is the conformance suite; the output shape is not "improved" in the default
-   mode. Corrections will live behind an explicit option (§8).
+   mode. Corrections live behind an explicit option (§8).
 2. **POS tagger = the Brill tagger from the `natural` npm package.** Retraining the CRF on
    natural's Brill tags instead of NLTK's perceptron tags costs 0.14 pt sentence accuracy
    (94.59% vs 94.73%; token 97.90% vs 97.97%; 81,416-sentence corpus, seed 42, 20% held out).
@@ -175,11 +175,12 @@ theirs; it is not part of the published package.
 
 ## 8. Changes beyond upstream
 
-None at this commit — it is the parity version. From here the port evolves on its own terms:
-upstream is tracked and its changes adopted deliberately; nothing is contributed back.
-Corrections of upstream behaviour will ship behind an explicit option and API additions will
-carry none, so the default output stays byte-parity and every harness level keeps running
-against the Python reference. Each correction gets a test asserting both modes.
+From `v2.7.0-parity` on, this port evolves on its own terms: upstream is tracked and its
+changes adopted deliberately; nothing is contributed back. Corrections of upstream behaviour
+ship behind `quirks: 'fixed'` and API additions carry no option. The default output stays
+byte-parity, so every harness level keeps running against the Python reference. The
+user-facing list of corrections and additions is [QUIRKS.md](QUIRKS.md); every entry has a
+test asserting both modes in `tests/quirks/`.
 
 ## 9. Publishing
 

@@ -1,6 +1,6 @@
 // Generate the lazy foundation-foods runtime modules from the vendored upstream data files
 // (write-once, provenance in docs/MODELS.md), Node only — a clean checkout builds without
-// Python or the upstream clone (docs/VERIFICATION.md):
+// Python or the upstream clone (docs/VERIFICATION.md D2):
 //   models/upstream/ingredient_embeddings.35d.glove.txt.gz -> src/en/data/glove.en.ts
 //   models/upstream/fdc_ingredients.csv.gz                  -> src/en/data/fdc.en.ts
 // Output is byte-identical to training/gen-ff-assets.py (the Python cross-check): GloVe values

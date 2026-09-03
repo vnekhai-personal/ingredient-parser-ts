@@ -4,7 +4,7 @@ import { LabelledToken, ParsedIngredient, type ParserDebugInfo } from '../datacl
 import { pyCapitalize } from '../_py.js';
 import type { NumpyCRFInference } from '../inference.js';
 import { load_parser_model } from './_loaders.js';
-import { PostProcessor } from './postprocess.js';
+import { PostProcessor, type Quirks } from './postprocess.js';
 import { PreProcessor } from './preprocess.js';
 
 export interface ParseIngredientEnOptions {
@@ -15,6 +15,18 @@ export interface ParseIngredientEnOptions {
   volumetric_units_system?: string;
   foundation_foods?: boolean;
   custom_units?: Readonly<Record<string, string>> | null;
+  /** Beyond upstream: 'upstream' (default, byte-parity with Python) or 'fixed' (docs/PORTING.md). */
+  quirks?: Quirks;
+}
+
+/** Addition beyond upstream: the model's view of a sentence without the postprocessor (`tag_ingredient`). */
+export interface TaggedIngredient {
+  /** Normalised sentence the tokens come from (`PreProcessor.sentence`). */
+  sentence: string;
+  tokens: string[];
+  pos_tags: string[];
+  labels: string[];
+  scores: number[];
 }
 
 interface Prepared {
@@ -70,8 +82,40 @@ function prepare(sentence: string, options: ParseIngredientEnOptions): Prepared 
     string_units,
     volumetric_units_system,
     foundation_foods,
+    quirks: options.quirks ?? 'upstream',
   });
   return { processed_sentence, postprocessed_sentence, TAGGER };
+}
+
+/**
+ * Addition beyond upstream (docs/QUIRKS.md): labels and marginal scores per token, exactly as
+ * `parse_ingredient` computes them (same preprocessing, model and `expect_name_in_output`
+ * fallback), without running the postprocessor. Lets a consumer build its own structure and
+ * never hit a postprocessor quirk or one of its upstream-mirrored raises.
+ */
+export function tag_ingredient_en(sentence: string, options: ParseIngredientEnOptions = {}): TaggedIngredient {
+  const expect_name_in_output = options.expect_name_in_output ?? true;
+  let custom_units: Record<string, string> = { ...(options.custom_units ?? {}) };
+  const _capitalized_units: Record<string, string> = {};
+  for (const [plural, singular] of Object.entries(custom_units)) {
+    _capitalized_units[pyCapitalize(plural)] = pyCapitalize(singular);
+  }
+  custom_units = { ...custom_units, ..._capitalized_units };
+  const TAGGER = load_parser_model();
+  const processed_sentence = new PreProcessor(sentence, { custom_units });
+  const tagged = TAGGER.tag_from_features(processed_sentence.sentence_features());
+  let labels = tagged.map(([l]) => l);
+  let scores = tagged.map(([, s]) => s);
+  if (expect_name_in_output && labels.every((label) => !label.includes('NAME'))) {
+    [labels, scores] = guess_ingredient_name(TAGGER, labels, scores);
+  }
+  return {
+    sentence: processed_sentence.sentence,
+    tokens: processed_sentence.tokenized_sentence.map((t) => t.text),
+    pos_tags: processed_sentence.tokenized_sentence.map((t) => t.pos_tag),
+    labels,
+    scores,
+  };
 }
 
 /** Parse an English ingredient sentence into structured data. */

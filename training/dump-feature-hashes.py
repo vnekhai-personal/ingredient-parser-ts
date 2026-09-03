@@ -3,7 +3,7 @@ fixtures/probe-recipes.json line, dump the normalised sentence, tokens, POS tags
 sha256 of the canonical-JSON feature dicts. The TS PreProcessor must reproduce every hash.
 
 Env: BRILL_TAGS_FILE and PORTER_STEMS_FILE must cover corpus + fixture tokens (see the
-recipe in tests/upstream/README.md / docs/PORTING.md §4).
+recipe in tests/upstream/README.md / training/README.md).
 
 Usage: python training/dump-feature-hashes.py [out=feature-hashes.jsonl]
 Output lines: {"src":"corpus"|"fixture:<recipe>","s":sentence,"n":normalised,"t":[tokens],

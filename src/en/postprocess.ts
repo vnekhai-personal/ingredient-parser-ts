@@ -26,9 +26,17 @@ import { FRACTION_TOKEN_PATTERN } from './_regex.js';
 import {
   combine_quantities_split_by_and,
   ingredient_amount_factory,
+  is_unit_synonym,
   pluralise_units,
   replace_string_range,
 } from './_utils.js';
+import { UNITS } from './_constants.js';
+
+/**
+ * `'upstream'` reproduces Python at the pin byte for byte (the harness contract); `'fixed'` applies
+ * this port's corrections of documented upstream bugs (docs/QUIRKS.md). Default `'upstream'`.
+ */
+export type Quirks = 'upstream' | 'fixed';
 import { match_foundation_foods } from './foundationfoods/index.js';
 
 export const WORD_CHAR = new RegExp(PY_W, 'u');
@@ -75,6 +83,14 @@ export interface PartialIngredientAmountInit {
 }
 
 /** Dataclass for incrementally building ingredient amount information. */
+/** Two unit token texts (possibly pluralised) name the same unit: equal, equal after singularising, or synonyms. */
+function sameUnit(a: string, b: string): boolean {
+  const sing = (u: string): string => (Object.hasOwn(UNITS, u) ? (UNITS as Record<string, string>)[u] as string : u);
+  const sa = sing(a).toLowerCase();
+  const sb = sing(b).toLowerCase();
+  return sa === sb || is_unit_synonym(sa, sb);
+}
+
 export class _PartialIngredientAmount {
   quantity: string;
   unit: string[];
@@ -101,6 +117,7 @@ export class _PartialIngredientAmount {
 
 export interface PostProcessorOptions {
   custom_units: Readonly<Record<string, string>>;
+  quirks?: Quirks;
   separate_names?: boolean;
   discard_isolated_stop_words?: boolean;
   string_units?: boolean;
@@ -126,6 +143,7 @@ export class PostProcessor {
   sentence: string;
   tokens: LabelledToken[];
   custom_units: Readonly<Record<string, string>>;
+  quirks: Quirks;
   separate_names: boolean;
   discard_isolated_stop_words: boolean;
   string_units: boolean;
@@ -141,6 +159,7 @@ export class PostProcessor {
     this.sentence = sentence;
     this.tokens = labelled_tokens;
     this.custom_units = options.custom_units;
+    this.quirks = options.quirks ?? 'upstream';
     this.separate_names = options.separate_names ?? true;
     this.discard_isolated_stop_words = options.discard_isolated_stop_words ?? true;
     this.string_units = options.string_units ?? false;
@@ -209,7 +228,26 @@ export class PostProcessor {
     const size = this._postprocess('SIZE');
     const preparation = this._postprocess('PREP');
     const comment = this._postprocess('COMMENT');
-    const purpose = this._postprocess('PURPOSE');
+    let purpose = this._postprocess('PURPOSE');
+
+    // QUIRK fix `section_headers` (docs/PORTING.md): a recipe section header such as "For the sauce" or
+    // "To serve" has no amount and gets labelled as a low-confidence name by the model. In 'fixed'
+    // mode a sentence whose tokens are ALL name tokens, starting with For/To, with the name's
+    // confidence below 0.6, is returned as `purpose` (what upstream itself produces when a colon
+    // follows: "For the sauce:" → PURPOSE) and no name.
+    if (
+      this.quirks === 'fixed' &&
+      amounts.length === 0 &&
+      name.length === 1 &&
+      purpose === null &&
+      this.tokens.every((t) => t.label.includes('NAME')) &&
+      /^(for|to)$/i.test(this.tokens[0]?.text ?? '') &&
+      (name[0] as IngredientText).confidence < 0.6
+    ) {
+      purpose = name[0] as IngredientText;
+      name = [];
+      foundationfoods = [];
+    }
 
     this.#parsed = new ParsedIngredient({
       name,
@@ -513,6 +551,10 @@ export class PostProcessor {
           // If fraction range, remove space that will follow hyphen caused by replacing # with space.
           text_fraction = pyReplaceAll(text_fraction, '- ', '-');
           group_tokens.push(text_fraction);
+        } else if (this.quirks === 'fixed' && selected_label === 'NAME' && pyAt(this.tokens, i).plural) {
+          // QUIRK fix `name_pluralisation`: the preprocessor singularised this token ("leaves" → "leaf");
+          // restore its plural here, per token, instead of re-pluralising the whole name text below.
+          group_tokens.push(pluralise_units(tokText, this.custom_units));
         } else {
           group_tokens.push(tokText);
         }
@@ -548,7 +590,11 @@ export class PostProcessor {
       text = parts.join(', ');
     }
     text = this._fix_punctuation(text);
-    text = pluralise_units(text, this.custom_units);
+    // QUIRK fix `name_pluralisation` (docs/PORTING.md): upstream re-pluralises every unit word inside
+    // every IngredientText, so a NAME like "flat-leaf parsley" becomes "flat-leaves parsley". In
+    // 'fixed' mode a NAME only restores the tokens the preprocessor singularised (per token, above);
+    // other fields keep upstream's behaviour.
+    if (!(this.quirks === 'fixed' && selected_label === 'NAME')) text = pluralise_units(text, this.custom_units);
 
     if (parts.length === 0) {
       return null;
@@ -1241,6 +1287,12 @@ export class PostProcessor {
     // confidence needs averaging. Then convert to IngredientAmount object.
     const processed_amounts: IngredientAmount[] = [];
     for (const amount of amounts) {
+      // QUIRK fix `duplicate_unit_tokens` (docs/PORTING.md): "1 teaspoon (tsp) salt" carries two UNIT tokens
+      // for the same unit; upstream joins them ("teaspoon tsp") and pint reads the space as a product
+      // (`teaspoon ** 2`). In 'fixed' mode, unit tokens that all name the same unit collapse to the first.
+      if (this.quirks === 'fixed' && amount.unit.length > 1 && amount.unit.every((u) => sameUnit(u, amount.unit[0] as string))) {
+        amount.unit = [amount.unit[0] as string];
+      }
       const unit = amount.unit.join(' ');
       const text = pyStrip([amount.quantity, unit].join(' '));
 

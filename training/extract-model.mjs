@@ -1,7 +1,7 @@
 // Turn the write-once model artifact into the runtime asset the package bundles eagerly:
 //   models/<ship model>.json.gz  →  src/en/data/model.en.ts (generated, gitignored); SRC below is the
 //   single source of truth for which model ships (training/ship-model.sh rewrites it; dump-parsed.py reads it)
-// Uncompressed on purpose: Hermes has no zlib (docs/PORTING.md §3.9). Run: pnpm model
+// Uncompressed on purpose: Hermes has no zlib (docs/PORTING.md step 5). Run: pnpm model
 import { readFileSync, mkdirSync, writeFileSync, existsSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import { createHash } from 'node:crypto';
